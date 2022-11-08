@@ -4,7 +4,7 @@ extern double 	dx;
 extern double 	dy; //velocita verticale (pixel per frame)
 extern double velocitaMassima; // velocita di movimento orizzontale massima
 extern double delta;
-extern float distacco_da_terra; //negativo, perchè lo misuro nel sistema di riferimento locale della palla
+extern float distacco_da_terra; //negativo, perchï¿½ lo misuro nel sistema di riferimento locale della palla
 extern double accelerazione ; // forza di accelerazione data dalla tastiera
 extern double decelerazione; //decelerazione in assenza di input
 extern float posx ; //coordinate sul piano della posizione iniziale della palla
@@ -107,7 +107,7 @@ void update(int a)
 	// Gestione del rimbalzo e quindi dell'altezza da terra
 
 	//Rimbalzo
-	dy -= delta;
+	//dy -= delta;
 
 	distacco_da_terra -= dy;
 	//printf("dy %f  Distacca da terra %f \n", dy, distacco_da_terra);
@@ -115,7 +115,7 @@ void update(int a)
    if (distacco_da_terra > 30)
    {
 	   distacco_da_terra = 30;
-	   dy = 30;   //Una volta giunta a terra la pallina ottiene un impulso positivo che la ritornare su
+	   //dy = 30;   //Una volta giunta a terra la pallina ottiene un impulso positivo che la ritornare su
    }
 
 

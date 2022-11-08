@@ -5,6 +5,7 @@
 #include "Lib.h"
 #include <sstream>
 #include <fstream>
+#include "Mesh.h"
 
 
 static unsigned int programId, programId1;
@@ -33,20 +34,6 @@ float  posy = float(height) * 0.2;
 bool pressing_left = false;
 bool pressing_right = false;
 
-typedef struct {
-	GLuint VAO;
-	GLuint VBO_G;
-	GLuint VBO_C;
-	int nTriangles;
-	// Vertici
-	vector<vec3> vertici;
-	vector<vec4> colors;
-	// Numero vertici
-	int nv;
-	//Matrice di Modellazione: Traslazione*Rotazione*Scala
-	mat4 Model;
-} Figura;
-
 
 Figura  Montagna = {};
 Figura Cielo= {};
@@ -54,13 +41,17 @@ Figura Prato = {};
 Figura Pala_Eolica= {};
 Figura Sole = {};
 Figura Palla = {};
-Figura persona = {};
+Figura nose = {};
+Figura head = {};
+Figura eye1 = {};
+Figura eye2 = {};
+Figura body = {};
 
 vector<Figura> Scena;
 
-float angolo = 0.0;
+Mesh character;
 
-fstream my_file;
+float angolo = 0.0;
 
 
 
@@ -72,7 +63,7 @@ void crea_VAO_Vector(Figura* fig)
 	//Genero , rendo attivo, riempio il VBO della geometria dei vertici
 	glGenBuffers(1, &fig->VBO_G);
 	glBindBuffer(GL_ARRAY_BUFFER, fig->VBO_G);
-	glBufferData(GL_ARRAY_BUFFER, fig->vertici.size() * sizeof(vec3),fig->vertici.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, fig->vertici.size() * sizeof(vec3),fig->vertici.data(), GL_DYNAMIC_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	glEnableVertexAttribArray(0);
@@ -80,7 +71,7 @@ void crea_VAO_Vector(Figura* fig)
 	//Genero , rendo attivo, riempio il VBO dei colori
 	glGenBuffers(1, &fig->VBO_C);
 	glBindBuffer(GL_ARRAY_BUFFER, fig->VBO_C);
-	glBufferData(GL_ARRAY_BUFFER, fig->colors.size() * sizeof(vec4), fig->colors.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, fig->colors.size() * sizeof(vec4), fig->colors.data(), GL_DYNAMIC_DRAW);
 	//Adesso carico il VBO dei colori nel layer 2
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	glEnableVertexAttribArray(1);
@@ -163,15 +154,15 @@ void costruisci_palla(vec4 color_top, vec4 color_bot, vec4 color_top_ombra, vec4
 
 }
 
-void costruisci_personaggio(vec4 color_top, vec4 color_bot, vec4 color_top_ombra, vec4 color_bot_ombra, Figura* persona)
+void costruisci_personaggio(string name, vec4 color_top, vec4 color_bot, Figura* persona)
 {
 	int i;
 
 	vector<float> points;
 	string myText;
-	ifstream MyReadFile("hermite.txt");
+	ifstream MyReadFile(name);
 	float x = 0, y = 0, z = 0;
-	
+
 	persona->vertici.push_back(vec3(0.0, 0.0, 0.0));
 	persona->colors.push_back(vec4(color_bot.r, color_bot.g, color_bot.b, color_bot.a));
 
@@ -189,6 +180,12 @@ void costruisci_personaggio(vec4 color_top, vec4 color_bot, vec4 color_top_ombra
 }
 
 
+float getXFromButterfly(float t){
+	return sin(t)*(exp(cos(t))-2*cos(4*t)); 
+}
+float getYFromButterfly(float t){
+	return cos(t)*(exp(cos(t))-2*cos(4*t));
+}
 
 
 
@@ -319,7 +316,11 @@ void INIT_SHADER(void)
 	char* vertexShader = (char*)"vertexShader_M.glsl";
 	char*  fragmentShader = (char*)"fragmentShader_M_new.glsl";
 
+	
+	char*  fragmentShader1 = (char*)"fragmentShader_M.glsl";
+
 	programId = ShaderMaker::createProgram(vertexShader, fragmentShader);
+	programId1 = ShaderMaker::createProgram(vertexShader, fragmentShader1);
 	
 }
 
@@ -360,7 +361,7 @@ void INIT_VAO(void)
 	 col_bottom = { 0.5, 0.9, 0.05, 0.8 };
 	 costruisci_pala_eolica(col_top, col_bottom, &Pala_Eolica);
 	 crea_VAO_Vector(&Pala_Eolica);
-	 Scena.push_back(Pala_Eolica);
+	 //Scena.push_back(Pala_Eolica);
 
 	
 	  Palla.nTriangles = 30;
@@ -370,15 +371,37 @@ void INIT_VAO(void)
 	  vec4 col_bottom_ombra = { 0.0, 0.0, 0.0, 0.6 };
 	 costruisci_palla(col_top, col_bottom, col_top_ombra, col_bottom_ombra, &Palla);
 	 crea_VAO_Vector(&Palla);
-	 Scena.push_back(Palla);
+	 //Scena.push_back(Palla);
 
 
 	//create my character's body
-	col_top = { 1.0,0.0,0.0,1.0 };
-	col_bottom = { 1.0, 0.8, 0.0, 1.0 };
-	costruisci_personaggio(col_top, col_bottom, col_top_ombra, col_bottom_ombra, &persona);
-	crea_VAO_Vector(&persona);
-	Scena.push_back(persona);
+	col_top = { 1.0,1.0, 1.0,1.0 };
+	col_bottom = { 0.3, 0.0, 0.0, 1.0 };
+	costruisci_personaggio("res/nose.txt", col_top, col_bottom, &nose);
+	crea_VAO_Vector(&nose);
+
+	//create head
+	col_top = { 0.7,0.6,0.3,1.0 };
+	col_bottom = { 1, 0.8, 0.0, 1.0 };
+	costruisci_personaggio("res/head.txt", col_top, col_bottom, &head);
+	crea_VAO_Vector(&head);
+	costruisci_personaggio("res/body.txt", col_top, col_bottom, &body);
+	crea_VAO_Vector(&body);
+
+	col_top = { 0.0, 0.2, .2, .2f };
+	col_bottom = { 0.2, .5, 16.0, 0.1 };
+	costruisci_personaggio("res/eyes.txt", col_top, col_bottom, &eye1);
+	crea_VAO_Vector(&eye1);
+	costruisci_personaggio("res/eyes.txt", col_top, col_bottom, &eye2);
+	crea_VAO_Vector(&eye2);
+
+	character.addBodypart(body);
+	character.addBodypart(head, -0.1, 1, 0);
+	character.addBodypart(nose, 0, 4.2, 0, 0.2);
+	character.addBodypart(eye1, 1, 6, 0, 0.2);
+	character.addBodypart(eye2, -1, 6, 0, 0.2);
+
+
 
 
 	 //Costruzione della matrice di Proiezione
@@ -398,15 +421,17 @@ void drawScene(void)
 	glUniformMatrix4fv(MatProj, 1, GL_FALSE, value_ptr(Projection));
  
 	//Disegno Cielo
+
+	float time = glutGet(GLUT_ELAPSED_TIME)/1000.0f;
+	vec2 resolution = vec2((float)width, (float)height);	
 	
 	glUseProgram(programId);
-	float time = glutGet(GLUT_ELAPSED_TIME)/1000.0f;
-	
-	vec2 resolution = vec2((float)width, (float)height);
-	 
 	glUniform1f(loctime, time);
 	glUniform2f(locres, resolution.x,resolution.y);
-	for (k=4;k<4;k++)
+	
+	
+	glUseProgram(programId1);
+	for (k= 0;k < 4;k++)
 	{
 		
 		glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(Scena[k].Model));
@@ -468,12 +493,13 @@ void drawScene(void)
 		glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(Scena[4].Model));
 
 
-		//glDrawArrays(GL_TRIANGLE_STRIP, Scena[4].nv - 4, 4);
-		 
+		glDrawArrays(GL_TRIANGLE_STRIP, Scena[4].nv - 4, 4);
+
+		/* 
 		//Disegna la Pala
 		 //Definisco la matrice di trasformazione per la Pala che ruota
 		Scena[4].Model = mat4(1.0);
-		Scena[4].Model = translate(Scena[4].Model, vec3(posx - bwidth / 2, posy + bheight + distacco_da_terra_n, 0.0f));
+		Scena[4].Model = translate(Scena[4].Model, vec3(posx - bwidth / 2, posy  + 200 + bheight + distacco_da_terra_n, 0.0f));
 		//Scena[4].Model = translate(Scena[4].Model, vec3(float(width) * 0.15, float(height) * 0.65, 0.0));
 		Scena[4].Model = scale(Scena[4].Model, vec3(40.0, 40.0, 1.0));
 		Scena[4].Model = rotate(Scena[4].Model, radians(angolo), vec3(0.0f, 0.0f, 1.0f));
@@ -486,12 +512,25 @@ void drawScene(void)
 		Scena[6].Model = mat4(1.0);
 		//Scena[6].Model = translate(Scena[6].Model, vec3(width / 2, height/2, 0.0f));
 		Scena[6].Model = translate(Scena[6].Model, vec3(posx - bwidth / 2, posy + bheight + distacco_da_terra_n, 0.0f));
-
+		Scena[6].Model = rotate(Scena[6].Model, radians(180.0f), vec3(.0f, .0f, 1.0f));
 		Scena[6].Model = scale(Scena[6].Model, vec3(200, 200, 1.0));
 
 		glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(Scena[6].Model));
 		glDrawArrays(GL_TRIANGLE_FAN, 0, persona.vertici.size());
-		glBindVertexArray(0);
+		glBindVertexArray(0); */
+
+		
+		//character.rotateAll(90, 0, 0, 1);
+		for(int i = 0; i < 100; i++){
+			character.translateMainBody(posx - bwidth / 2 + getXFromButterfly(time/2 + 100*i) *100, posy + bheight + 100  + getYFromButterfly(time/2 + 100*i)*100);
+			character.translateBodyPart();
+			character.scaleAll(30, 30);
+			character.draw(MatModel);
+		}
+		
+		//quando e' stato scale, devo fare piu offset, quindi offset devono essere aumentati incaso
+		//la scale e' piu' grande
+
 
 	glutSwapBuffers();
 

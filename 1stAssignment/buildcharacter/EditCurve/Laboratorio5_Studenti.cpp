@@ -464,7 +464,7 @@ void mykeyboard(unsigned char key, int x, int y)
 		//Disegno la curca se ho pi� di 2 vertici di controllo
 		if (Poligonale.CP.size() > 1)
 		{	glBindVertexArray(Curva.VAO);
-			glDrawArrays(GL_TRIANGLE_FAN, 0, Curva.vertici.size());
+			glDrawArrays(GL_LINE_STRIP, 0, Curva.vertici.size());
 			glBindVertexArray(0);
 		}
 		
