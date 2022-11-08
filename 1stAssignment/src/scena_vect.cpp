@@ -197,33 +197,46 @@ void costruisci_Sole(vec4 color_top, vec4 color_bot, vec4 color_top_alone, vec4 
 	float stepA = (2 * PI) / Sole->nTriangles;
 	float t;
 
+	int x = 1, y = 1;
 
 	Sole->vertici.push_back(vec3(0.0, 0.0, 0.0));
 	Sole->colors.push_back(vec4(color_bot.r,color_bot.g,color_bot.b,color_bot.a));
 
-	for (i = Sole->nTriangles / 10; i <= Sole->nTriangles / 1.5; i++)
+	vec4 colorOffset = vec4(0.3);
+
+	for (i = 0; i <= Sole->nTriangles; i++)
 	{
 		t = (float)i * stepA;
-		
 		Sole->vertici.push_back(vec3(cos(t), sin(t),0.0));
-		//Sole->vertici.push_back(vec3(cos(t)* 10, sin(t)* 10,0.0));
-		Sole->vertici.push_back(vec3(cos(t)* i, sin(t)* i,0.0));
-		//Sole->vertici.push_back(vec3(cos(t)*20, sin(t)*20,0.0));
+
+		if(i > Sole->nTriangles / 2){
+			x = 5; y = 2;
+			color_bot = colorOffset;
+			color_top = colorOffset;
+			Sole->vertici.push_back(vec3(cos(t)*5 * x, sin(t)*5*y,0.0));
+			Sole->vertici.push_back(vec3(cos(t)* 2 * x, sin(t)* 2 * y,0.0));
+		}else{
+			Sole->vertici.push_back(vec3(cos(t)* 2 * x, sin(t)* 2 * y,0.0));
+			Sole->vertici.push_back(vec3(cos(t)*5 * x, sin(t)*5*y,0.0));
+		}
+
+		//Sole->vertici.push_back(vec3(cos(t)* 2 * x, sin(t)* 2 * y,0.0));
+		//Sole->vertici.push_back(vec3(cos(t)* i, sin(t)* i,0.0));
 		//Colore 
 		Sole->colors.push_back(vec4(color_top.r, color_top.g, color_top.b, color_top.a));
 		Sole->colors.push_back(vec4(color_top.r, color_top.g, color_top.b, color_top.a));
-		//Sole->colors.push_back(vec4(color_top.r, color_top.g, color_top.b, color_top.a));
+		Sole->colors.push_back(vec4(color_top.r, color_top.g, color_top.b, color_top.a));
 		//Sole->colors.push_back(vec4(color_top.r, color_top.g, color_top.b, color_top.a));
  	}
 
 	//Costruzione Alone
-	/*Sole->vertici.push_back(vec3(0.0, 0.0, 0.0));
-	Sole->colors.push_back(vec4(color_bot_alone.r, color_bot_alone.g, color_bot_alone.b, color_bot_alone.a));
-	for (i = 0; i <= Sole->nTriangles; i++)
+	//Sole->vertici.push_back(vec3(0.0, 0.0, 0.0));
+	//Sole->colors.push_back(vec4(color_bot_alone.r, color_bot_alone.g, color_bot_alone.b, color_bot_alone.a));
+	/*for (i = 0; i <= Sole->nTriangles; i++)
 	{
 		t = (float)i * stepA;
 
-		Sole->vertici.push_back(vec3(2.0*cos(t), 2.0*sin(t), 0.0));
+		Sole->vertici.push_back(vec3(10.0*cos(t), 10.0*sin(t), 0.0));
 		//Colore 
 		 
 		Sole->colors.push_back(vec4(color_top_alone.r, color_top_alone.g, color_top_alone.b, color_top_alone.a));
@@ -232,10 +245,10 @@ void costruisci_Sole(vec4 color_top, vec4 color_bot, vec4 color_top_alone, vec4 
 	 
 
 	//Costruzione matrice di Moellazione Sole, che rimane la stessa(non si aggiorna durante l'animazione)
-	//Sole->nv = Sole->vertici.size();
-	//Sole->Model = mat4(1.0);
-	//Sole->Model = translate(Sole->Model, vec3(float(width) * 0.5, float(height) * 0.5, 0.0));
-	//Sole->Model = scale(Sole->Model, vec3(30.0, 30.0, 1.0));
+	Sole->nv = Sole->vertici.size();
+	Sole->Model = mat4(1.0);
+	Sole->Model = translate(Sole->Model, vec3(float(width) * 0.5, float(height) * 0.5, 0.0));
+	Sole->Model = scale(Sole->Model, vec3(30.0, 30.0, 1.0));
 	
 }
 
@@ -358,8 +371,8 @@ void INIT_SHADER(void)
 
 void INIT_VAO(void)
 {
-	vec4 col_top = { 0.6471, 0.3020,1.0,1.0 };
-	vec4 col_bottom = { 0.0, 0.4980,1.0,1.0 };
+	vec4 col_top = {0.0, 0.4980,1.0,1.0};
+	vec4 col_bottom = { 0.8471, 0.4020, 0.20,1.0 };
 	costruisci_cielo(col_top, col_bottom, &Cielo);
 	crea_VAO_Vector(&Cielo);
 
@@ -377,7 +390,8 @@ void INIT_VAO(void)
 	 col_top = vec4{ 1.0,0.4980, 0.0353,1.0000 };
 	 costruisci_montagne(6, col_top, col_bottom, &Montagna);
 	 crea_VAO_Vector(&Montagna);
-	 Scena.push_back(Montagna);
+	 //Scena.push_back(Montagna);
+
 	 Sole.nTriangles = 30;
 	 col_top = vec4{ 1.0, 0.9, 0.9, 0.8 };
 	 col_bottom = vec4{ 1.0,0.8627,0.0, 1.0000 };
@@ -392,7 +406,7 @@ void INIT_VAO(void)
 	 col_top = { 0.0,1.0,0.0,1.0 };
 	 col_bottom = { 0.5, 0.9, 0.05, 0.8 };
 	 costruisci_pala_eolica(col_top, col_bottom, &Pala_Eolica);
-	 crea_VAO_Vector(&Pala_Eolica);
+	 //crea_VAO_Vector(&Pala_Eolica);
 	 //Scena.push_back(Pala_Eolica);
 
 	
@@ -402,7 +416,7 @@ void INIT_VAO(void)
 	  vec4 col_top_ombra = { 0.49,0.49,0.49,0.0 };
 	  vec4 col_bottom_ombra = { 0.0, 0.0, 0.0, 0.6 };
 	 costruisci_palla(col_top, col_bottom, col_top_ombra, col_bottom_ombra, &Palla);
-	 crea_VAO_Vector(&Palla);
+	 //crea_VAO_Vector(&Palla);
 	 //Scena.push_back(Palla);
 
 	 wings.nTriangles = 80;
@@ -475,16 +489,16 @@ void drawScene(void)
 	
 	
 	glUseProgram(programId1);
-	for (k= 0;k < 4;k++)
+	for (k= 0;k < 3;k++)
 	{
 		
 		glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(Scena[k].Model));
 		glBindVertexArray(Scena[k].VAO);
 		 
-		if (k<3)
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, Scena[k].nv);
-		else
+		if (k == 2)
 			glDrawArrays(GL_TRIANGLES, 0, Scena[k].nv);
+		else
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, Scena[k].nv);
 		glBindVertexArray(0);
 	}
 	
@@ -566,10 +580,10 @@ void drawScene(void)
 		
 		//character.rotateAll(90, 0, 0, 1);
 		for(int i = 0; i < 5; i++){
-			character.translateMainBody(posx - bwidth / 2 + getXFromButterfly(time/2 + 100*i) * 70, posy + bheight + 100  + getYFromButterfly(time/2 + 100*i)*70);
+			character.translateMainBody(posx - bwidth / 2 + getXFromButterfly(time/2 + 100*i) * 70 + 300, posy + bheight + 100  + getYFromButterfly(time/2 + 100*i)*70);
 			character.animation(1, sin(time*3), 1);
 			character.translateBodyPart();
-			character.scaleAll(50, 50);
+			character.scaleAll(40, 40);
 			character.draw(MatModel);
 		}
 		
