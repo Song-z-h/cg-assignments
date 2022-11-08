@@ -48,16 +48,18 @@ class Mesh{
         vector<vec3> offsets;
         vector<vec3> scales;
         bool consumed = false;
+        GLint drawType;
     
     public:
-        Mesh(){
+        Mesh(GLint drawType){
+            this->drawType = drawType;
         }
         void draw(GLuint &MatModel){
             //bodySync();
             for(int i = 0; i < bodyParts.size(); i++){
                 glBindVertexArray(bodyParts[i].VAO);
                 glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(bodyParts[i].Model));
-                glDrawArrays(GL_TRIANGLE_FAN, 0, bodyParts[i].vertici.size());
+                glDrawArrays(drawType, 0, bodyParts[i].vertici.size());
                 glBindVertexArray(0);
             }
         }
@@ -114,6 +116,11 @@ class Mesh{
                 offsets[i].z *= z; 
              }
                 
+        }
+
+        void animation(int i, float x, float y, float z = 1.0f){
+            if (i < 0 || i >= bodyParts.size()) return;         
+             bodyParts[i].Model = scale(bodyParts[i].Model, vec3(x, y, z));
         }
 
 };
