@@ -20,7 +20,7 @@ int width = 1400;
 int height = 800;
 
 // parametri della palla
-float distacco_da_terra = 30; // distacco da terra 
+float distacco_da_terra = 31; // distacco da terra 
 double delta = 1.5; // forza di gravita
 double 	dy = 20; //velocita verticale (pixel per frame)
 double dx = 0; //velocita orizzontale (pixel per frame)
@@ -56,6 +56,7 @@ Mesh character(GL_TRIANGLE_FAN);
 Mesh player(GL_TRIANGLE_FAN);
 
 float angolo = 0.0;
+int nEnemy = 5;
 
 
 
@@ -143,7 +144,7 @@ void costruisci_palla(vec4 color_top, vec4 color_bot, vec4 color_top_ombra, vec4
 
 
 	//Costruzione ombra 
-	palla->vertici.push_back(vec3(0.0, 0.0, 0.0));
+	/*palla->vertici.push_back(vec3(0.0, 0.0, 0.0));
 	palla->colors.push_back(vec4(color_bot_ombra.r, color_bot_ombra.g, color_bot_ombra.b, color_bot_ombra.a));
 
 	for (i = 0; i <= palla->nTriangles; i++)
@@ -155,7 +156,7 @@ void costruisci_palla(vec4 color_top, vec4 color_bot, vec4 color_top_ombra, vec4
 		palla->colors.push_back(vec4(color_top_ombra.r, color_top_ombra.g, color_top_ombra.b, color_top_ombra.a));
 	}
 	palla->nv = palla->vertici.size();
-
+	*/
 }
 
 void costruisci_personaggio(string name, vec4 color_top, vec4 color_bot, Figura* persona)
@@ -391,14 +392,14 @@ void INIT_VAO(void)
 	 //Scena.push_back(Pala_Eolica);
 
 	
-	  Palla.nTriangles = 10;
+	  Palla.nTriangles = 50;
 	  col_top = { 1.0,0.0,0.0,1.0 };
 	  col_bottom = { 1.0, 0.8, 0.0, 1.0 };
 	  vec4 col_top_ombra = { 0.49,0.49,0.49,0.0 };
 	  vec4 col_bottom_ombra = { 0.0, 0.0, 0.0, 0.6 };
 	 costruisci_palla(col_top, col_bottom, col_top_ombra, col_bottom_ombra, &Palla);
-	 //crea_VAO_Vector(&Palla);
-	 //Scena.push_back(Palla);
+	 crea_VAO_Vector(&Palla);
+	 Scena.push_back(Palla);
 
 	 wings.nTriangles = 80;
 	 col_top = { 0.2,0.01, 0.05,1.0 };
@@ -520,31 +521,35 @@ void drawScene(void)
 
 
 	glBindVertexArray(0);
- 
+	int indexK = 3;
 	//Palla ed Ombra
-	glBindVertexArray(Scena[5].VAO);
+	glBindVertexArray(Scena[indexK].VAO);
 	//matrice di Trasformazione della Palla
-	Scena[5].Model = mat4(1.0);
-	Scena[5].Model = translate(Scena[5].Model, vec3(posx - bwidth / 2, posy + bheight + distacco_da_terra_n, 0.0f));
-	Scena[5].Model = scale(Scena[5].Model, vec3(float(bwidth) / 2, float(bheight) / 2, 1.0));
-	glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(Scena[5].Model));
+	for(int i = 0; i < nEnemy; i++){
+		Scena[indexK].Model = mat4(1.0);
+		Scena[indexK].Model = translate(Scena[indexK].Model, vec3(width / 2 + i *100, height /2 , 0.0f));
+		Scena[indexK].Model = scale(Scena[indexK].Model, vec3(10, 10, 1.0));
+		glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(Scena[indexK].Model));
+		glDrawArrays(GL_TRIANGLE_FAN, 0, (Scena[indexK].vertici.size()));
+	}
+	//Scena[indexK].Model = scale(Scena[indexK].Model, vec3(float(bwidth) / 2, float(bheight) / 2, 1.0));
 	//Disegna Corpo della palla  
-	// glDrawArrays(GL_TRIANGLE_FAN, 0, (Scena[5].nTriangles) + 2);
-	
+
+	/*
 	 //matrice di Trasformazione della Palla
-	 Scena[5].Model = mat4(1.0);
-	 Scena[5].Model = translate(Scena[5].Model, vec3(posx - bwidth / 2 * shadow_scale, posy + 10 + 10 * (1 - shadow_scale), 0.0f));
-	 Scena[5].Model = scale(Scena[5].Model, vec3(float(bwidth) * shadow_scale, (50.0 * shadow_scale), 1.0));
-	 glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(Scena[5].Model));
+	 Scena[indexK].Model = mat4(1.0);
+	 Scena[indexK].Model = translate(Scena[indexK].Model, vec3(posx - bwidth / 2 * shadow_scale, posy + 10 + 10 * (1 - shadow_scale), 0.0f));
+	 Scena[indexK].Model = scale(Scena[indexK].Model, vec3(float(bwidth) * shadow_scale, (50.0 * shadow_scale), 1.0));
+	 glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(Scena[indexK].Model));
 	 //Disegna Ombra
-	//f glDrawArrays(GL_TRIANGLE_FAN, (Scena[5].nTriangles) + 2, (Scena[5].nTriangles) + 2);
+	 glDrawArrays(GL_TRIANGLE_FAN, (Scena[indexK].nTriangles) + 2, (Scena[indexK].nTriangles) + 2);
 	
 	glBindVertexArray(0);
-
+	*/
 
 
 	//Disegno 6 PALE EOLICHE
-	glBindVertexArray(Scena[4].VAO);
+	/*glBindVertexArray(Scena[4].VAO);
 	
 		//Disegno il sostegno
 		//Definisco la matrice di Trasformazione per il sostegno che rimane fisso durante l'animazione
@@ -559,36 +564,28 @@ void drawScene(void)
 
 
 		glDrawArrays(GL_TRIANGLE_STRIP, Scena[4].nv - 4, 4);
-
-		/* 
+	*/
+		
 		//Disegna la Pala
 		 //Definisco la matrice di trasformazione per la Pala che ruota
-		Scena[4].Model = mat4(1.0);
-		Scena[4].Model = translate(Scena[4].Model, vec3(posx - bwidth / 2, posy  + 200 + bheight + distacco_da_terra_n, 0.0f));
+		 /*
+		 int k = 3;
+		glBindVertexArray(Scena[k].VAO);
+		Scena[k].Model = mat4(1.0);
+		Scena[k].Model = translate(Scena[k].Model, vec3(width/2, height/2, 0.0f));
 		//Scena[4].Model = translate(Scena[4].Model, vec3(float(width) * 0.15, float(height) * 0.65, 0.0));
-		Scena[4].Model = scale(Scena[4].Model, vec3(40.0, 40.0, 1.0));
-		Scena[4].Model = rotate(Scena[4].Model, radians(angolo), vec3(0.0f, 0.0f, 1.0f));
+		Scena[k].Model = scale(Scena[k].Model, vec3(40.0, 40.0, 1.0));
+		Scena[k].Model = rotate(Scena[k].Model, radians(angolo), vec3(0.0f, 0.0f, 1.0f));
 		glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(Scena[4].Model));
 			   
-		glDrawArrays(GL_TRIANGLES, 0, nv_P);
-
-		//disegna roba di hermite
-		glBindVertexArray(Scena[6].VAO);
-		Scena[6].Model = mat4(1.0);
-		//Scena[6].Model = translate(Scena[6].Model, vec3(width / 2, height/2, 0.0f));
-		Scena[6].Model = translate(Scena[6].Model, vec3(posx - bwidth / 2, posy + bheight + distacco_da_terra_n, 0.0f));
-		Scena[6].Model = rotate(Scena[6].Model, radians(180.0f), vec3(.0f, .0f, 1.0f));
-		Scena[6].Model = scale(Scena[6].Model, vec3(200, 200, 1.0));
-
-		glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(Scena[6].Model));
-		glDrawArrays(GL_TRIANGLE_FAN, 0, persona.vertici.size());
-		glBindVertexArray(0); */
+		glDrawArrays(GL_TRIANGLES, 0, Scena); 
+		*/
 
 		
 		//character.rotateAll(90, 0, 0, 1);
-		for(int i = 0; i < 5; i++){
+		for(int i = 0; i < nEnemy; i++){
 			character.translateMainBody(getXFromButterfly(time/2 + 100*i) * 70 + 0.8*width, 300 + getYFromButterfly(time/2 + 100*i)*70);
-			character.animation(1, sin(time*3), 1);
+			character.animation(1, sin(time*3 + 10*i), 1);
 			character.translateBodyPart();
 			character.scaleAll(40, 40);
 			character.draw(MatModel);
