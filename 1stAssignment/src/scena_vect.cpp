@@ -13,7 +13,7 @@ static unsigned int programId, programId1;
 #define  PI   3.14159265358979323846
 
 mat4 Projection;
-GLuint MatProj, MatModel, loctime, locres, colorLerp;
+GLuint MatProj, MatModel, loctime, locres, colorLerp, playerPos;
 int nv_P;
 // viewport size
 int width = 1400;
@@ -460,7 +460,7 @@ void INIT_VAO(void)
 	 loctime = glGetUniformLocation(programId, "time");
 	 locres = glGetUniformLocation(programId, "resolution");
 	 colorLerp = glGetUniformLocation(programId, "colorLerp");
-	
+	playerPos = glGetUniformLocation(programId, "playerPos");
 }
 void drawScene(void)
 {
@@ -483,9 +483,18 @@ void drawScene(void)
 
 	float distacco_da_terra_n = -distacco_da_terra;
 	float sun_scale = lerp(0.1, 0.8, (float)distacco_da_terra_n / 255);
+		
+	float shadow_scale = lerp(1, 0, (float)distacco_da_terra_n / 255);
+	if (shadow_scale < 0)
+		shadow_scale = 0;
+	
+	float bwidth = distacco_da_terra_n < 0 ? lerp(80, 100, (float)abs(distacco_da_terra_n) / 20) : 80; // larghezza effettiva in pixel della palla
+	float bheight = distacco_da_terra_n < 0 ? 80 + distacco_da_terra_n : 80; // altezza effettiva in pixel della palla
+
 	//glUseProgram(programId1);
-	glUniform1f(colorLerp, (float)lerp(0.7, 1.0, (float)distacco_da_terra_n / 255));
- 
+	glUniform1f(colorLerp, (float)lerp(0.68, 1.0, (float)distacco_da_terra_n / 255));
+	
+	glUniform2f(playerPos, posx - bwidth / 2, posy + bheight / 2 + distacco_da_terra_n);
 	for (k= 0;k < Scena.size() ;k++)
 	{
 
@@ -508,19 +517,6 @@ void drawScene(void)
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, Scena[k].nv);
 		glBindVertexArray(0);
 	}
-
-	
-	
-	
- 
-
-	
-	float shadow_scale = lerp(1, 0, (float)distacco_da_terra_n / 255);
-	if (shadow_scale < 0)
-		shadow_scale = 0;
-	
-	float bwidth = distacco_da_terra_n < 0 ? lerp(80, 100, (float)abs(distacco_da_terra_n) / 20) : 80; // larghezza effettiva in pixel della palla
-	float bheight = distacco_da_terra_n < 0 ? 80 + distacco_da_terra_n : 80; // altezza effettiva in pixel della palla
 
 
 	glBindVertexArray(0);
