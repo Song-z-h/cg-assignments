@@ -1,5 +1,5 @@
 #include "Lib.h"
-extern bool pressing_left, pressing_right, moving;
+extern bool pressing_left, pressing_right, moving, jumping;
 extern double 	dx;
 extern double 	dy; //velocita verticale (pixel per frame)
 extern double velocitaMassima; // velocita di movimento orizzontale massima
@@ -23,6 +23,10 @@ void keyboardPressedEvent(unsigned char key, int x, int y)
 		pressing_right = true;
 		break;
 
+	case ' ':
+		jumping = true;
+		break;
+
 	case 27:
 		exit(0);
 		break;
@@ -42,6 +46,9 @@ void keyboardReleasedEvent(unsigned char key, int x, int y)
 
 	case 'd':
 		pressing_right = false;
+		break;
+	
+	case ' ':
 		break;
 
 	default:
@@ -107,13 +114,16 @@ void update(int a)
 	// Gestione del rimbalzo e quindi dell'altezza da terra
 
 	//Rimbalzo
-	dy -= delta;
+	if(jumping){
+		dy -= delta;
+		distacco_da_terra -= dy;
+	}
 
-	distacco_da_terra -= dy;
 	//printf("dy %f  Distacca da terra %f \n", dy, distacco_da_terra);
 	 
    if (distacco_da_terra > 30)
    {
+		jumping = false;
 	   distacco_da_terra = 30;
 	   dy = 30;   //Una volta giunta a terra la pallina ottiene un impulso positivo che la ritornare su
    }
@@ -122,7 +132,7 @@ void update(int a)
 
 	
 	glutPostRedisplay();
-	glutTimerFunc(24, update, 0);
+	glutTimerFunc(30, update, 0);
 }
 
 

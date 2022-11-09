@@ -13,7 +13,7 @@ static unsigned int programId, programId1;
 #define  PI   3.14159265358979323846
 
 mat4 Projection;
-GLuint MatProj, MatModel, loctime, locres;
+GLuint MatProj, MatModel, loctime, locres, colorLerp;
 int nv_P;
 // viewport size
 int width = 1400;
@@ -33,6 +33,7 @@ float  posy = float(height) * 0.2;
 //Booleani posti a true se si usa il tasto a (spostamento a sinistra) e b (spostamento a destra)
 bool pressing_left = false;
 bool pressing_right = false;
+bool jumping = false;
 
 
 Figura  Montagna = {};
@@ -458,6 +459,7 @@ void INIT_VAO(void)
 	 MatModel = glGetUniformLocation(programId, "Model");
 	 loctime = glGetUniformLocation(programId, "time");
 	 locres = glGetUniformLocation(programId, "resolution");
+	 colorLerp = glGetUniformLocation(programId, "colorLerp");
 	
 }
 void drawScene(void)
@@ -478,7 +480,12 @@ void drawScene(void)
 	glUniform2f(locres, resolution.x,resolution.y);
 	
 	float fadeAmount = 3;
+
+	float distacco_da_terra_n = -distacco_da_terra;
+	float sun_scale = lerp(0.1, 0.8, (float)distacco_da_terra_n / 255);
 	//glUseProgram(programId1);
+	glUniform1f(colorLerp, (float)lerp(0.7, 1.0, (float)distacco_da_terra_n / 255));
+ 
 	for (k= 0;k < Scena.size() ;k++)
 	{
 
@@ -487,7 +494,7 @@ void drawScene(void)
 			Scena[k].Model = mat4(1.0);
 			Scena[k].Model = translate(Scena[k].Model , vec3(float(width) * 0.5, float(height) * 0.5, 0.0));
 			Scena[k].Model = scale(Scena[k].Model , vec3(30.0, 30.0, 1.0));
-			Scena[k].Model = scale(Scena[k].Model , vec3( 1 , abs(cos(time / fadeAmount))	, 1.0));
+			Scena[k].Model = scale(Scena[k].Model , vec3( 1 , sun_scale	, 1.0));
 
 		}
 		
@@ -507,10 +514,11 @@ void drawScene(void)
 	
  
 
-	float distacco_da_terra_n = -distacco_da_terra;
+	
 	float shadow_scale = lerp(1, 0, (float)distacco_da_terra_n / 255);
 	if (shadow_scale < 0)
 		shadow_scale = 0;
+	
 	float bwidth = distacco_da_terra_n < 0 ? lerp(80, 100, (float)abs(distacco_da_terra_n) / 20) : 80; // larghezza effettiva in pixel della palla
 	float bheight = distacco_da_terra_n < 0 ? 80 + distacco_da_terra_n : 80; // altezza effettiva in pixel della palla
 
@@ -525,7 +533,7 @@ void drawScene(void)
 	Scena[5].Model = scale(Scena[5].Model, vec3(float(bwidth) / 2, float(bheight) / 2, 1.0));
 	glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(Scena[5].Model));
 	//Disegna Corpo della palla  
-	 glDrawArrays(GL_TRIANGLE_FAN, 0, (Scena[5].nTriangles) + 2);
+	// glDrawArrays(GL_TRIANGLE_FAN, 0, (Scena[5].nTriangles) + 2);
 	
 	 //matrice di Trasformazione della Palla
 	 Scena[5].Model = mat4(1.0);
@@ -533,7 +541,7 @@ void drawScene(void)
 	 Scena[5].Model = scale(Scena[5].Model, vec3(float(bwidth) * shadow_scale, (50.0 * shadow_scale), 1.0));
 	 glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(Scena[5].Model));
 	 //Disegna Ombra
-	 glDrawArrays(GL_TRIANGLE_FAN, (Scena[5].nTriangles) + 2, (Scena[5].nTriangles) + 2);
+	//f glDrawArrays(GL_TRIANGLE_FAN, (Scena[5].nTriangles) + 2, (Scena[5].nTriangles) + 2);
 	
 	glBindVertexArray(0);
 
@@ -591,7 +599,7 @@ void drawScene(void)
 		}
 		
 
-			player.translateMainBody(posx - bwidth / 2, posy  + bheight / 2 + distacco_da_terra_n, 0.0f);
+			player.translateMainBody(posx - bwidth / 2, posy + bheight / 2 + distacco_da_terra_n, 0.0f);
 			//splayer.animation(1, sin(time*3), 1);
 			player.translateBodyPart();
 			player.scaleAll(40, 40);
