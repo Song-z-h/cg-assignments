@@ -52,6 +52,7 @@ Figura catCloth = {};
 vector<Figura> Scena;
 
 Mesh character(GL_TRIANGLE_FAN);
+Mesh player(GL_TRIANGLE_FAN);
 
 float angolo = 0.0;
 
@@ -226,29 +227,13 @@ void costruisci_Sole(vec4 color_top, vec4 color_bot, vec4 color_top_alone, vec4 
 		Sole->colors.push_back(vec4(color_top.r, color_top.g, color_top.b, color_top.a));
 		Sole->colors.push_back(vec4(color_top.r, color_top.g, color_top.b, color_top.a));
 		Sole->colors.push_back(vec4(color_top.r, color_top.g, color_top.b, color_top.a));
-		//Sole->colors.push_back(vec4(color_top.r, color_top.g, color_top.b, color_top.a));
  	}
-
-	//Costruzione Alone
-	//Sole->vertici.push_back(vec3(0.0, 0.0, 0.0));
-	//Sole->colors.push_back(vec4(color_bot_alone.r, color_bot_alone.g, color_bot_alone.b, color_bot_alone.a));
-	/*for (i = 0; i <= Sole->nTriangles; i++)
-	{
-		t = (float)i * stepA;
-
-		Sole->vertici.push_back(vec3(10.0*cos(t), 10.0*sin(t), 0.0));
-		//Colore 
-		 
-		Sole->colors.push_back(vec4(color_top_alone.r, color_top_alone.g, color_top_alone.b, color_top_alone.a));
-
-	} */
-	 
 
 	//Costruzione matrice di Moellazione Sole, che rimane la stessa(non si aggiorna durante l'animazione)
 	Sole->nv = Sole->vertici.size();
-	Sole->Model = mat4(1.0);
-	Sole->Model = translate(Sole->Model, vec3(float(width) * 0.5, float(height) * 0.5, 0.0));
-	Sole->Model = scale(Sole->Model, vec3(30.0, 30.0, 1.0));
+	//Sole->Model = mat4(1.0);
+	//Sole->Model = translate(Sole->Model, vec3(float(width) * 0.5, float(height) * 0.5, 0.0));
+	//Sole->Model = scale(Sole->Model, vec3(30.0, 30.0, 1.0));
 	
 }
 
@@ -362,10 +347,10 @@ void INIT_SHADER(void)
 	char*  fragmentShader = (char*)"fragmentShader_M_new.glsl";
 
 	
-	char*  fragmentShader1 = (char*)"fragmentShader_M.glsl";
+	//char*  fragmentShader1 = (char*)"fragmentShader_M.glsl";
 
 	programId = ShaderMaker::createProgram(vertexShader, fragmentShader);
-	programId1 = ShaderMaker::createProgram(vertexShader, fragmentShader1);
+	//programId1 = ShaderMaker::createProgram(vertexShader, fragmentShader1);
 	
 }
 
@@ -376,21 +361,13 @@ void INIT_VAO(void)
 	costruisci_cielo(col_top, col_bottom, &Cielo);
 	crea_VAO_Vector(&Cielo);
 
-	Scena.push_back(Cielo);
 
-
+	 
 	col_top = vec4{ 0.1333, 0.5451, 0.1333, 1.0000 };
 	col_bottom = vec4{ 0.6784, 1.0,0.1843, 1.0000 };
 	costruisci_prato(col_top, col_bottom, &Prato);
 	crea_VAO_Vector(&Prato);
-	Scena.push_back(Prato);
 
-	 Montagna.nTriangles = 120;
-	 col_bottom = vec4{ 0.5451, 0.2706, 0.0745, 1.0000 };
-	 col_top = vec4{ 1.0,0.4980, 0.0353,1.0000 };
-	 costruisci_montagne(6, col_top, col_bottom, &Montagna);
-	 crea_VAO_Vector(&Montagna);
-	 //Scena.push_back(Montagna);
 
 	 Sole.nTriangles = 30;
 	 col_top = vec4{ 1.0, 0.9, 0.9, 0.8 };
@@ -399,8 +376,11 @@ void INIT_VAO(void)
 	 vec4 col_bottom_alone = { 1.0,0.8627,0.0, 1.0000 };
 	 costruisci_Sole(col_top, col_bottom, col_top_alone, col_bottom_alone, &Sole);
 	 crea_VAO_Vector(&Sole);
-	 Scena.push_back(Sole);
 
+	// order of scene objects
+	Scena.push_back(Cielo);
+	Scena.push_back(Prato);
+	Scena.push_back(Sole);
 	 
 	 Pala_Eolica.nTriangles = 8;
 	 col_top = { 0.0,1.0,0.0,1.0 };
@@ -461,6 +441,16 @@ void INIT_VAO(void)
 	character.addBodypart(eye1, 1, 6, 0, 0.2);
 	character.addBodypart(eye2, -1, 6, 0, 0.2);
 	character.addBodypart(catCloth, 0, 0.2, 0, 1.5);
+
+	player.addBodypart(body, 0, 0, 0, 0.001);
+	//player.addBodypart(wings, 0, 0, 0, 3);
+	player.addBodypart(body);
+	player.addBodypart(head, -0.1, 1, 0);
+	player.addBodypart(nose, 0, 4.2, 0, 0.2);
+	player.addBodypart(eye1, 1, 6, 0, 0.2);
+	player.addBodypart(eye2, -1, 6, 0, 0.2);
+	//player.addBodypart(catCloth, 0, 0.2, 0, 1.5);
+
 	
 	 //Costruzione della matrice di Proiezione
 	 Projection = ortho(0.0f, float(width), 0.0f, float(height));
@@ -487,20 +477,33 @@ void drawScene(void)
 	glUniform1f(loctime, time);
 	glUniform2f(locres, resolution.x,resolution.y);
 	
-	
-	glUseProgram(programId1);
-	for (k= 0;k < 3;k++)
+	float fadeAmount = 3;
+	//glUseProgram(programId1);
+	for (k= 0;k < Scena.size() ;k++)
 	{
+
+		if(k == 2){
+			//sole
+			Scena[k].Model = mat4(1.0);
+			Scena[k].Model = translate(Scena[k].Model , vec3(float(width) * 0.5, float(height) * 0.5, 0.0));
+			Scena[k].Model = scale(Scena[k].Model , vec3(30.0, 30.0, 1.0));
+			Scena[k].Model = scale(Scena[k].Model , vec3( 1 , abs(cos(time / fadeAmount))	, 1.0));
+
+		}
 		
 		glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(Scena[k].Model));
 		glBindVertexArray(Scena[k].VAO);
 		 
-		if (k == 2)
+		if (k == 2){
 			glDrawArrays(GL_TRIANGLES, 0, Scena[k].nv);
+		}
 		else
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, Scena[k].nv);
 		glBindVertexArray(0);
 	}
+
+	
+	
 	
  
 
@@ -580,15 +583,20 @@ void drawScene(void)
 		
 		//character.rotateAll(90, 0, 0, 1);
 		for(int i = 0; i < 5; i++){
-			character.translateMainBody(posx - bwidth / 2 + getXFromButterfly(time/2 + 100*i) * 70 + 300, posy + bheight + 100  + getYFromButterfly(time/2 + 100*i)*70);
+			character.translateMainBody(getXFromButterfly(time/2 + 100*i) * 70 + 0.8*width, 300 + getYFromButterfly(time/2 + 100*i)*70);
 			character.animation(1, sin(time*3), 1);
 			character.translateBodyPart();
 			character.scaleAll(40, 40);
 			character.draw(MatModel);
 		}
 		
-		//quando e' stato scale, devo fare piu offset, quindi offset devono essere aumentati incaso
-		//la scale e' piu' grande
+
+			player.translateMainBody(posx - bwidth / 2, posy  + bheight / 2 + distacco_da_terra_n, 0.0f);
+			//splayer.animation(1, sin(time*3), 1);
+			player.translateBodyPart();
+			player.scaleAll(40, 40);
+			player.draw(MatModel);
+
 
 
 	glutSwapBuffers();

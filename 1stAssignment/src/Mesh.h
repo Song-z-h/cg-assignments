@@ -20,7 +20,7 @@ class Shape{
     public:
         vec3 anchorPos;
         Figura figura;
-        Shape(Figura & figura, float x, float y, float z = 0){
+        Shape(Figura figura, float x, float y, float z = 0){
             this->figura = figura;
             this->setAnchorPosition(x, y, z);
         }
@@ -120,7 +120,7 @@ class Mesh{
 
         void animation(int i, float x, float y, float z = 1.0f){
             if (i < 0 || i >= bodyParts.size()) return;         
-             bodyParts[i].Model = scale(bodyParts[i].Model, vec3(x, y, z));
+             bodyParts[i].Model = scale(bodyParts[i].Model, vec3(x, y, z)); 
         }
 
 };
