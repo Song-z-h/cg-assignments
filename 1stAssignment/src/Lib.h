@@ -7,5 +7,7 @@
 #include <vector>
 #include "GestioneEventi.h"
 #include "BoundingBox.h"
+#include <sstream>
+#include <fstream>
 using namespace glm;
 using namespace std;
