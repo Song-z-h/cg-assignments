@@ -168,8 +168,7 @@ void update_projectiles(int a)
 		{
 			break;
 		}
-		// cout << i << " -> " <<  boundingBoxesProjectile[i].getBottomCorner().x << " " <<  boundingBoxesProjectile[i].getBottomCorner().y << " , " << boundingBoxesProjectile[i].getTopCorner().x << " " << boundingBoxesProjectile[i].getTopCorner().y  << endl;;
-		// cout << boundingBoxPlayer.getBottomCorner().x << " " <<  boundingBoxPlayer.getBottomCorner().y << " , " << boundingBoxPlayer.getTopCorner().x << " " << boundingBoxPlayer.getTopCorner().y  << endl;;
+		//check for collision
 		if (boundingBoxesProjectile[i].checkCollision(boundingBoxPlayer) && boundingBoxesProjectile[i].isAlive())
 		{
 			playerHp -= bulletDamage;

@@ -58,148 +58,6 @@ float playerHp = 1;							 // player hp bar ranging from -1 to 1
 float bulletDamage = 0.2;					 // the dmg
 float projectileSpeed = 10;
 
-void costruisci_Sole(vec4 color_top, vec4 color_bot, vec4 color_top_alone, vec4 color_bot_alone, Figura *Sole)
-{
-
-	int i;
-	float stepA = (2 * PI) / Sole->nTriangles;
-	float t;
-
-	int x = 1, y = 1;
-
-	Sole->vertici.push_back(vec3(0.0, 0.0, 0.0));
-	Sole->colors.push_back(vec4(color_bot.r, color_bot.g, color_bot.b, color_bot.a));
-
-	vec4 colorOffset = vec4(0.3);
-
-	for (i = 0; i <= Sole->nTriangles; i++)
-	{
-		t = (float)i * stepA;
-		Sole->vertici.push_back(vec3(cos(t), sin(t), 0.0));
-
-		if (i > Sole->nTriangles / 2)
-		{
-			x = 5;
-			y = 2;
-			color_bot = colorOffset;
-			color_top = colorOffset;
-			Sole->vertici.push_back(vec3(cos(t) * 5 * x, sin(t) * 5 * y, 0.0));
-			Sole->vertici.push_back(vec3(cos(t) * 2 * x, sin(t) * 2 * y, 0.0));
-		}
-		else
-		{
-			Sole->vertici.push_back(vec3(cos(t) * 2 * x, sin(t) * 2 * y, 0.0));
-			Sole->vertici.push_back(vec3(cos(t) * 5 * x, sin(t) * 5 * y, 0.0));
-		}
-
-		// Sole->vertici.push_back(vec3(cos(t)* 2 * x, sin(t)* 2 * y,0.0));
-		// Sole->vertici.push_back(vec3(cos(t)* i, sin(t)* i,0.0));
-		// Colore
-		Sole->colors.push_back(vec4(color_top.r, color_top.g, color_top.b, color_top.a));
-		Sole->colors.push_back(vec4(color_top.r, color_top.g, color_top.b, color_top.a));
-		Sole->colors.push_back(vec4(color_top.r, color_top.g, color_top.b, color_top.a));
-	}
-
-	// Costruzione matrice di Moellazione Sole, che rimane la stessa(non si aggiorna durante l'animazione)
-	Sole->nv = Sole->vertici.size();
-	// Sole->Model = mat4(1.0);
-	// Sole->Model = translate(Sole->Model, vec3(float(width) * 0.5, float(height) * 0.5, 0.0));
-	// Sole->Model = scale(Sole->Model, vec3(30.0, 30.0, 1.0));
-}
-
-void costruisci_montagne(int numero_di_montagne, vec4 color_top, vec4 color_bot, Figura *v_montagna)
-{
-	int i = 0;
-
-	float step = 1 / (float)v_montagna->nTriangles;
-	float frequenza = PI * numero_di_montagne;
-	float t;
-	int n_vertici = 0;
-
-	for (i = 0; i < v_montagna->nTriangles; i += 1)
-	{
-		t = i / (float)v_montagna->nTriangles * frequenza;
-		v_montagna->vertici.push_back(vec3(i * step, 0, 0));
-		v_montagna->colors.push_back(vec4(color_bot.r, color_bot.g, color_bot.b, color_bot.a));
-		v_montagna->vertici.push_back(vec3(i * step, abs(sin(t)), 0.0));
-
-		v_montagna->colors.push_back(vec4(color_top.r, color_top.g, color_top.b, color_top.a));
-	}
-	v_montagna->nv = v_montagna->vertici.size();
-
-	// Costruzione matrice di Modellazione Montagne, che rimane la stessa(non si aggiorna)
-	v_montagna->Model = mat4(1.0);
-	v_montagna->Model = translate(v_montagna->Model, vec3(0.0, float(height) / 2, 0.0));
-	v_montagna->Model = scale(v_montagna->Model, vec3(float(width), float(height) / 8, 1.0));
-}
-
-void costruisci_cielo(vec4 color_top, vec4 color_bot, Figura *cielo)
-{
-
-	cielo->vertici.push_back(vec3(0.0, 0.0, 0.0));
-	cielo->colors.push_back(vec4(color_bot.r, color_bot.g, color_bot.b, color_top.a));
-	cielo->vertici.push_back(vec3(1.0, 0.0, 0.0));
-	cielo->colors.push_back(vec4(color_bot.r, color_bot.g, color_bot.b, color_bot.a));
-	cielo->vertici.push_back(vec3(0.0, 1.0, 0.0));
-	cielo->colors.push_back(vec4(color_top.r, color_top.g, color_top.b, color_top.a));
-	cielo->vertici.push_back(vec3(1.0, 1.0, 0.0));
-	cielo->colors.push_back(vec4(color_top.r, color_top.g, color_top.b, color_top.a));
-
-	cielo->nv = cielo->vertici.size();
-
-	// Costruzione matrice di Modellazione Sole, che rimane la stessa(non si aggiorna)
-	cielo->Model = mat4(1.0);
-	cielo->Model = translate(cielo->Model, vec3(0.0, float(height) / 2, 0.0));
-	cielo->Model = scale(cielo->Model, vec3(float(width), float(height) / 2, 1.0));
-}
-void costruisci_prato(vec4 color_top, vec4 color_bot, Figura *prato)
-{
-
-	prato->vertici.push_back(vec3(0.0, 0.0, 0.0));
-	prato->colors.push_back(vec4(color_top.r, color_top.g, color_top.b, color_top.a));
-	prato->vertici.push_back(vec3(0.0, 1.0, 0.0));
-	prato->colors.push_back(vec4(color_top.r, color_top.g, color_top.b, color_top.a));
-	prato->vertici.push_back(vec3(1.0, 0.0, 0.0));
-	prato->colors.push_back(vec4(color_top.r, color_top.g, color_top.b, color_top.a));
-	prato->vertici.push_back(vec3(1.0, 1.0, 0.0));
-	prato->colors.push_back(vec4(color_bot.r, color_bot.g, color_bot.b, color_bot.a));
-
-	prato->nv = prato->vertici.size();
-
-	// Costruzione matrice di Modellazione Prato, che rimane la stessa(non si aggiorna)
-	prato->Model = mat4(1.0);
-	prato->Model = scale(prato->Model, vec3(float(width), float(height) / 2, 1.0));
-}
-
-void costruisci_farfalla(float cx, float cy, float raggiox, float raggioy, vec4 color_top, vec4 color_bot, Figura *fig)
-{
-
-	int i;
-	float stepA = (2 * PI) / fig->nTriangles;
-	float t;
-
-	fig->vertici.push_back(vec3(cx, cy, 0.0));
-
-	fig->colors.push_back(color_top);
-
-	for (i = 0; i <= fig->nTriangles; i++)
-	{
-		t = (float)i * stepA;
-		fig->vertici.push_back(vec3(cx + raggiox * (sin(t) * (exp(cos(t)) - 2 * cos(4 * t)) + pow(sin(t / 12), 5)) / 4, cy + raggioy * (cos(t) * (exp(cos(t)) - 2 * cos(4 * t)) + pow(sin(t / 12), 5)) / 4, 0.0));
-		// Colore
-		fig->colors.push_back(color_bot);
-	}
-	fig->nv = fig->vertici.size();
-}
-
-double lerp(double a, double b, double amount)
-{
-
-	// Interpolazione lineare tra a e b secondo amount
-
-	return (1 - amount) * a + amount * b;
-}
-
 void INIT_SHADER(void)
 {
 	GLenum ErrorCheckValue = glGetError();
@@ -307,6 +165,8 @@ void INIT_VAO(void)
 	colorLerp = glGetUniformLocation(programId, "colorLerp");
 	playerPos = glGetUniformLocation(programId, "playerPos");
 	playerHP = glGetUniformLocation(programId, "playerHp");
+
+	// add bounding boxes to objects
 	for (int i = 0; i < nEnemy; i++)
 	{
 		posProjectiles.push_back(vec3(0, 0, 0));
@@ -365,7 +225,7 @@ void drawScene(void)
 		glBindVertexArray(Scena[k].VAO);
 
 		if (k == 2)
-		{
+		{ // sole
 			glDrawArrays(GL_TRIANGLES, 0, Scena[k].nv);
 		}
 		else
@@ -373,55 +233,7 @@ void drawScene(void)
 		glBindVertexArray(0);
 	}
 
-	// Scena[indexK].Model = scale(Scena[indexK].Model, vec3(float(bwidth) / 2, float(bheight) / 2, 1.0));
-	// Disegna Corpo della palla
-
-	/*
-	 //matrice di Trasformazione della Palla
-	 Scena[indexK].Model = mat4(1.0);
-	 Scena[indexK].Model = translate(Scena[indexK].Model, vec3(posx - bwidth / 2 * shadow_scale, posy + 10 + 10 * (1 - shadow_scale), 0.0f));
-	 Scena[indexK].Model = scale(Scena[indexK].Model, vec3(float(bwidth) * shadow_scale, (50.0 * shadow_scale), 1.0));
-	 glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(Scena[indexK].Model));
-	 //Disegna Ombra
-	 glDrawArrays(GL_TRIANGLE_FAN, (Scena[indexK].nTriangles) + 2, (Scena[indexK].nTriangles) + 2);
-
-	glBindVertexArray(0);
-	*/
-
-	// Disegno 6 PALE EOLICHE
-	/*glBindVertexArray(Scena[4].VAO);
-
-		//Disegno il sostegno
-		//Definisco la matrice di Trasformazione per il sostegno che rimane fisso durante l'animazione
-
-		Scena[4].Model = mat4(1.0);
-		Scena[4].Model = translate(Scena[4].Model, vec3(posx - bwidth / 2, posy + bheight + distacco_da_terra_n, 0.0f));
-		//Scena[4].Model = translate(Scena[4].Model, vec3(float(width) * 0.15, float(height) * 0.65, 0.0));
-		Scena[4].Model = scale(Scena[4].Model, vec3(3.0, 100.0, 1.0));
-
-
-		glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(Scena[4].Model));
-
-
-		glDrawArrays(GL_TRIANGLE_STRIP, Scena[4].nv - 4, 4);
-	*/
-
-	// Disegna la Pala
-	// Definisco la matrice di trasformazione per la Pala che ruota
-	/*
-	int k = 3;
-   glBindVertexArray(Scena[k].VAO);
-   Scena[k].Model = mat4(1.0);
-   Scena[k].Model = translate(Scena[k].Model, vec3(width/2, height/2, 0.0f));
-   //Scena[4].Model = translate(Scena[4].Model, vec3(float(width) * 0.15, float(height) * 0.65, 0.0));
-   Scena[k].Model = scale(Scena[k].Model, vec3(40.0, 40.0, 1.0));
-   Scena[k].Model = rotate(Scena[k].Model, radians(angolo), vec3(0.0f, 0.0f, 1.0f));
-   glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(Scena[4].Model));
-
-   glDrawArrays(GL_TRIANGLES, 0, Scena);
-   */
-
-	// character.rotateAll(90, 0, 0, 1);
+	// draw enemies
 	for (int i = 0; i < nEnemy; i++)
 	{
 		if (posProjectiles[i].x < 0)
@@ -438,6 +250,7 @@ void drawScene(void)
 		character.draw(MatModel);
 	}
 
+	// draw player
 	player.translateMainBody(posx - bwidth / 2, posy + bheight / 2 + distacco_da_terra_n, 0.0f);
 	// splayer.animation(1, sin(time*3), 1);
 	player.translateBodyPart();
@@ -454,7 +267,6 @@ void drawScene(void)
 	{
 		Scena[indexK].Model = mat4(1.0);
 		Scena[indexK].Model = translate(Scena[indexK].Model, vec3(posProjectiles[i].x, posProjectiles[i].y, 0.0f));
-		// Scena[indexK].Model = rotate(Scena[indexK].Model, radians(angolo), vec3(0.0f, 0.0f, 1.0f));
 		Scena[indexK].Model = scale(Scena[indexK].Model, vec3(10 + time, 10 + time, 1.0));
 		glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(Scena[indexK].Model));
 		if (boundingBoxesProjectile[i].isAlive())

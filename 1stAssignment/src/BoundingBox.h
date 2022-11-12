@@ -87,6 +87,11 @@ public:
 		bot = vec4(xmin, ymin, 0.0, 1.0);
 		top = vec4(xmax, ymax, 0.0, 1.0);
 	}
+
+	void printInfo()
+	{
+		cout << getBottomCorner().x << " " << getBottomCorner().y << " , " << getTopCorner().x << " " << getTopCorner().y << endl;
+	}
 };
 
 #endif
