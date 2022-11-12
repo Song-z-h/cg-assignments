@@ -16,6 +16,8 @@ typedef struct {
 	mat4 Model;
 } Figura;
 
+
+
 class Shape{
     public:
         vec3 anchorPos;
@@ -44,16 +46,22 @@ class Shape{
 
 class Mesh{
     private:
-        vector<Figura> bodyParts;
         vector<vec3> offsets;
         vector<vec3> scales;
         bool consumed = false;
         GLint drawType;
-    
+        vector<Figura> bodyParts;
     public:
+
+        mat4 getBodyPartsModel(int i){
+            if (i < 0 || i >= bodyParts.size()) return mat4(1.0f); 
+            return bodyParts[i].Model;
+        }
+
         Mesh(GLint drawType){
             this->drawType = drawType;
         }
+
         void draw(GLuint &MatModel){
             //bodySync();
             for(int i = 0; i < bodyParts.size(); i++){

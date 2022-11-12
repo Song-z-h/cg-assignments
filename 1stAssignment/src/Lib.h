@@ -6,5 +6,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <vector>
 #include "GestioneEventi.h"
+#include "BoundingBox.h"
 using namespace glm;
 using namespace std;

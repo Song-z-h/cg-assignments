@@ -1,4 +1,5 @@
 #include "Lib.h"
+
 extern bool pressing_left, pressing_right, moving, jumping;
 extern double 	dx;
 extern double 	dy; //velocita verticale (pixel per frame)
@@ -11,6 +12,13 @@ extern float posx ; //coordinate sul piano della posizione iniziale della palla
 extern float  posy;
 extern int  width;
 extern float angolo;
+extern vector<vec3> posProjectiles;
+extern float projectileSpeed;
+extern vector<BoundingBox> boundingBoxesProjectile;
+extern BoundingBox boundingBoxPlayer;
+extern float playerHp;
+extern float bulletDamage;
+
 void keyboardPressedEvent(unsigned char key, int x, int y)
 {
 	switch (key)
@@ -135,11 +143,45 @@ void update(int a)
 	glutTimerFunc(30, update, 0);
 }
 
+float getXFromButterfly(float t){
+	return sin(t)*(exp(cos(t))-2*cos(4*t)); 
+}
+float getYFromButterfly(float t){
+	return cos(t)*(exp(cos(t))-2*cos(4*t));
+}
 
 void update_pala(int a)
 {
 	
-	angolo+=5;
+	angolo+=20;
 	glutPostRedisplay();
 	glutTimerFunc(24, update_pala, 0);
+}
+
+void update_projectiles(int a){
+
+
+
+	for(int i = 0; i < posProjectiles.size(); i++){
+
+		//don't do collisione check at begining
+		if(boundingBoxPlayer.getBottomCorner().x == boundingBoxPlayer.getTopCorner().x){
+			break;
+		}
+		//cout << i << " -> " <<  boundingBoxesProjectile[i].getBottomCorner().x << " " <<  boundingBoxesProjectile[i].getBottomCorner().y << " , " << boundingBoxesProjectile[i].getTopCorner().x << " " << boundingBoxesProjectile[i].getTopCorner().y  << endl;; 
+		//cout << boundingBoxPlayer.getBottomCorner().x << " " <<  boundingBoxPlayer.getBottomCorner().y << " , " << boundingBoxPlayer.getTopCorner().x << " " << boundingBoxPlayer.getTopCorner().y  << endl;; 
+		if(boundingBoxesProjectile[i].checkCollision(boundingBoxPlayer) && boundingBoxesProjectile[i].isAlive()){
+			//cout << " hit " << endl;
+			//exit(0);
+			playerHp -= bulletDamage;
+			boundingBoxesProjectile[i].setAlive(false);
+		}
+		if(playerHp <= -0.99){
+			exit(0);
+		}
+		posProjectiles[i].x -= projectileSpeed;
+	}
+
+	glutPostRedisplay();
+	glutTimerFunc(24, update_projectiles, 0);
 }

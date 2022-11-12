@@ -13,7 +13,7 @@ static unsigned int programId, programId1;
 #define  PI   3.14159265358979323846
 
 mat4 Projection;
-GLuint MatProj, MatModel, loctime, locres, colorLerp, playerPos;
+GLuint MatProj, MatModel, loctime, locres, colorLerp, playerPos, playerHP;
 int nv_P;
 // viewport size
 int width = 1400;
@@ -34,6 +34,7 @@ float  posy = float(height) * 0.2;
 bool pressing_left = false;
 bool pressing_right = false;
 bool jumping = false;
+float projectileSpeed = 10;
 
 
 Figura  Montagna = {};
@@ -56,7 +57,14 @@ Mesh character(GL_TRIANGLE_FAN);
 Mesh player(GL_TRIANGLE_FAN);
 
 float angolo = 0.0;
-int nEnemy = 5;
+const int nEnemy = 5;
+
+vector<vec3> posProjectiles;
+vector<BoundingBox> boundingBoxesProjectile;
+BoundingBox boundingBoxPlayer;
+BoundingBox projectiles[nEnemy];
+float playerHp = 1;
+float bulletDamage = 0.2;
 
 
 
@@ -185,12 +193,7 @@ void costruisci_personaggio(string name, vec4 color_top, vec4 color_bot, Figura*
 }
 
 
-float getXFromButterfly(float t){
-	return sin(t)*(exp(cos(t))-2*cos(4*t)); 
-}
-float getYFromButterfly(float t){
-	return cos(t)*(exp(cos(t))-2*cos(4*t));
-}
+
 
 
 
@@ -379,17 +382,17 @@ void INIT_VAO(void)
 	 costruisci_Sole(col_top, col_bottom, col_top_alone, col_bottom_alone, &Sole);
 	 crea_VAO_Vector(&Sole);
 
-	// order of scene objects
+	 Pala_Eolica.nTriangles = 8;
+	 col_top = { 1.0,0.0,0.0,1.0 };
+	 col_bottom = { 1.0, 0.0, 0.05, 0.8 };
+	 costruisci_pala_eolica(col_top, col_bottom, &Pala_Eolica);
+	 crea_VAO_Vector(&Pala_Eolica);
+
+	 // order of scene objects
 	Scena.push_back(Cielo);
 	Scena.push_back(Prato);
 	Scena.push_back(Sole);
-	 
-	 Pala_Eolica.nTriangles = 8;
-	 col_top = { 0.0,1.0,0.0,1.0 };
-	 col_bottom = { 0.5, 0.9, 0.05, 0.8 };
-	 costruisci_pala_eolica(col_top, col_bottom, &Pala_Eolica);
-	 //crea_VAO_Vector(&Pala_Eolica);
-	 //Scena.push_back(Pala_Eolica);
+	Scena.push_back(Pala_Eolica);
 
 	
 	  Palla.nTriangles = 50;
@@ -398,8 +401,8 @@ void INIT_VAO(void)
 	  vec4 col_top_ombra = { 0.49,0.49,0.49,0.0 };
 	  vec4 col_bottom_ombra = { 0.0, 0.0, 0.0, 0.6 };
 	 costruisci_palla(col_top, col_bottom, col_top_ombra, col_bottom_ombra, &Palla);
-	 crea_VAO_Vector(&Palla);
-	 Scena.push_back(Palla);
+	 //crea_VAO_Vector(&Palla);
+	 //Scena.push_back(Palla);
 
 	 wings.nTriangles = 80;
 	 col_top = { 0.2,0.01, 0.05,1.0 };
@@ -462,6 +465,14 @@ void INIT_VAO(void)
 	 locres = glGetUniformLocation(programId, "resolution");
 	 colorLerp = glGetUniformLocation(programId, "colorLerp");
 	playerPos = glGetUniformLocation(programId, "playerPos");
+	playerHP = glGetUniformLocation(programId, "playerHp");
+	for(int i = 0; i < nEnemy; i++){
+		posProjectiles.push_back(vec3(0, 0, 0));
+		
+		projectiles[i].addVertices(Palla.vertici);
+		boundingBoxesProjectile.push_back(projectiles[i]);
+	}
+	boundingBoxPlayer.addVertices(body.vertici);
 }
 void drawScene(void)
 {
@@ -479,7 +490,7 @@ void drawScene(void)
 	glUseProgram(programId);
 	glUniform1f(loctime, time);
 	glUniform2f(locres, resolution.x,resolution.y);
-	
+	glUniform1f(playerHP, playerHp);
 	float fadeAmount = 3;
 
 	float distacco_da_terra_n = -distacco_da_terra;
@@ -520,18 +531,6 @@ void drawScene(void)
 	}
 
 
-	glBindVertexArray(0);
-	int indexK = 3;
-	//Palla ed Ombra
-	glBindVertexArray(Scena[indexK].VAO);
-	//matrice di Trasformazione della Palla
-	for(int i = 0; i < nEnemy; i++){
-		Scena[indexK].Model = mat4(1.0);
-		Scena[indexK].Model = translate(Scena[indexK].Model, vec3(width / 2 + i *100, height /2 , 0.0f));
-		Scena[indexK].Model = scale(Scena[indexK].Model, vec3(10, 10, 1.0));
-		glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(Scena[indexK].Model));
-		glDrawArrays(GL_TRIANGLE_FAN, 0, (Scena[indexK].vertici.size()));
-	}
 	//Scena[indexK].Model = scale(Scena[indexK].Model, vec3(float(bwidth) / 2, float(bheight) / 2, 1.0));
 	//Disegna Corpo della palla  
 
@@ -584,11 +583,19 @@ void drawScene(void)
 		
 		//character.rotateAll(90, 0, 0, 1);
 		for(int i = 0; i < nEnemy; i++){
+			if(posProjectiles[i].x < 0){
+				posProjectiles[i].x = getXFromButterfly(time/2 + 100*i) * 70 + 0.8*width;
+				posProjectiles[i].y = 300 + getYFromButterfly(time/2 + 100*i)*70;
+				boundingBoxesProjectile[i].setAlive(true);
+			}
+			
 			character.translateMainBody(getXFromButterfly(time/2 + 100*i) * 70 + 0.8*width, 300 + getYFromButterfly(time/2 + 100*i)*70);
 			character.animation(1, sin(time*3 + 10*i), 1);
 			character.translateBodyPart();
 			character.scaleAll(40, 40);
 			character.draw(MatModel);
+			
+			
 		}
 		
 
@@ -597,8 +604,26 @@ void drawScene(void)
 			player.translateBodyPart();
 			player.scaleAll(40, 40);
 			player.draw(MatModel);
+			boundingBoxPlayer.updateModel(player.getBodyPartsModel(1));
 
+		
 
+		glBindVertexArray(0);
+		int indexK = 3;
+		//Palla ed Ombra
+		glBindVertexArray(Scena[indexK].VAO);
+		//matrice di Trasformazione della Palla
+		for(int i = 0; i < nEnemy; i++){
+			Scena[indexK].Model = mat4(1.0);
+			Scena[indexK].Model = translate(Scena[indexK].Model, vec3(posProjectiles[i].x, posProjectiles[i].y , 0.0f));
+			//Scena[indexK].Model = rotate(Scena[indexK].Model, radians(angolo), vec3(0.0f, 0.0f, 1.0f));
+			Scena[indexK].Model = scale(Scena[indexK].Model, vec3(10 + time, 10 + time, 1.0));
+			glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(Scena[indexK].Model));
+			if(boundingBoxesProjectile[i].isAlive())
+				glDrawArrays(GL_TRIANGLE_FAN, 0, (Scena[indexK].vertici.size()));
+			boundingBoxesProjectile[i].updateModel(Scena[indexK].Model);
+
+		}
 
 	glutSwapBuffers();
 
@@ -629,6 +654,7 @@ int main(int argc, char* argv[])
 	//gestione animazione
 	glutTimerFunc(66, update, 0);
 	glutTimerFunc(66, update_pala, 0);
+	glutTimerFunc(66, update_projectiles, 0);
 
 	glewExperimental = GL_TRUE;
 	glewInit();
