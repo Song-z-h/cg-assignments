@@ -2,7 +2,7 @@
 #include <iostream>
 #include "ShaderMaker.h"
 #include "CreateFigure.h"
-static unsigned int programId, programId1; // scene and characters
+static unsigned int programId, programId1;// scene and characters
 
 // for programId
 mat4 Projection;
@@ -59,7 +59,7 @@ vector<vec3> posProjectiles;				 // posiiton used to update bullets
 vector<BoundingBox> boundingBoxesProjectile; // bounding boxes for bullets
 BoundingBox boundingBoxPlayer;				 // bunding box to update player
 BoundingBox projectiles[nEnemy];			 // single boundingBoxes of bullets
-float playerHp = 0.95;							 // player hp bar ranging from -1 to 1
+float playerHp = 1;							 // player hp bar ranging from -1 to 1
 float bulletDamage = 0.2;					 // the dmg
 float projectileSpeed = 10;
 
