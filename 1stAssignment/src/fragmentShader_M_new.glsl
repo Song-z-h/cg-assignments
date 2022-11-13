@@ -24,6 +24,15 @@ const float offset = 100.0;
 const float fluid_speed = 10.0;
 const float color_intensity = 0.3;
 
+
+
+float noise(float x, float amplitude) {
+	float n = sin(x*8.0 + time) * 0.05 +
+		sin(x*27.3 + time*0.5) * 0.005 + 
+		sin(time) * 0.01;
+	return n * amplitude;
+}
+
 vec3 getColor(){
    vec2 p = (2.0 * gl_FragCoord.xy - resolution) / max(resolution.x,resolution.y);
         
@@ -45,24 +54,24 @@ vec3 getColor(){
 void main()
 {
 // Convert screen coorzates to normalized device coordinates (NDC)
- 
     vec2 ndc = vec2((gl_FragCoord.x / resolution.x - 0.5) * 2, (gl_FragCoord.y / resolution.y - 0.5) * 2);
     vec2 PlayerPosNdc = vec2((playerPos.x / resolution.x - 0.5) * 2, ((playerPos.y + 80)/ resolution.y - 0.5) * 2);
+    float n0 = noise(ndc.x * 1.18, 0.7);
     float playerDis = distance(ndc.xy, PlayerPosNdc.xy);
-        if(abs(playerDis) < 0.02){
-          FragColor = vec4(1.0, 1.0, 0, 1);
+    if(abs(playerDis) < 0.02){
+      FragColor = vec4(1.0, 1.0, 0, 1);
     }
-
-   else if(ndc.y > -0.8 && ndc.y < 1)
+ // hp bar
+    else if(ndc.y > -0.95-n0 && ndc.y < -0.75 -n0 && ndc.x > -1 && ndc.x < playerHp){
+      FragColor = vec4(getColor(), 1.0);
+    }
+  //luce 
+   else if(ndc.y > -1 && ndc.y < 1)
      {
 		  FragColor = vec4(ourColor.x * colorLerp, ourColor.y * colorLerp, ourColor.z * colorLerp, ourColor.a);
       
     }
-    else if(ndc.y > -1 && ndc.y < - 0.8 && ndc.x > -1 && ndc.x < playerHp){
-      float hpColor = playerHp < 0.2 ? 0.2 : playerHp;
-      //FragColor = vec4(1.0,  hpColor , hpColor, 1.0);
-      FragColor = vec4(getColor(), 1.0);
-    }
+   
     else{ 
        FragColor = ourColor;
     }
