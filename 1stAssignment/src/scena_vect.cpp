@@ -2,10 +2,15 @@
 #include <iostream>
 #include "ShaderMaker.h"
 #include "CreateFigure.h"
-static unsigned int programId, programId1;
+static unsigned int programId, programId1; // scene and characters
 
+// for programId
 mat4 Projection;
 GLuint MatProj, MatModel, loctime, locres, colorLerp, playerPos, playerHP;
+
+// for programId1
+GLuint MatProj1, MatModel1;
+
 int nv_P;
 // viewport size
 int width = 1400;
@@ -54,7 +59,7 @@ vector<vec3> posProjectiles;				 // posiiton used to update bullets
 vector<BoundingBox> boundingBoxesProjectile; // bounding boxes for bullets
 BoundingBox boundingBoxPlayer;				 // bunding box to update player
 BoundingBox projectiles[nEnemy];			 // single boundingBoxes of bullets
-float playerHp = 1;							 // player hp bar ranging from -1 to 1
+float playerHp = 0.95;							 // player hp bar ranging from -1 to 1
 float bulletDamage = 0.2;					 // the dmg
 float projectileSpeed = 10;
 
@@ -65,10 +70,11 @@ void INIT_SHADER(void)
 	char *vertexShader = (char *)"vertexShader_M.glsl";
 	char *fragmentShader = (char *)"fragmentShader_M_new.glsl";
 
-	// char*  fragmentShader1 = (char*)"fragmentShader_M.glsl";
+	//char *vertexShader1 = (char *)"vertexShader_M.glsl";
+	char *fragmentShader1 = (char *)"fragmentShader_M.glsl";
 
 	programId = ShaderMaker::createProgram(vertexShader, fragmentShader);
-	// programId1 = ShaderMaker::createProgram(vertexShader, fragmentShader1);
+	programId1 = ShaderMaker::createProgram(vertexShader, fragmentShader1);
 }
 
 void INIT_VAO(void)
@@ -100,10 +106,10 @@ void INIT_VAO(void)
 	crea_VAO_Vector(&Palla);
 
 	// order of scene objects
-	Scena.push_back(Cielo);
-	Scena.push_back(Prato);
-	Scena.push_back(Sole);
-	Scena.push_back(Palla);
+	Scena.push_back(Cielo); // 0
+	Scena.push_back(Prato); // 1
+	Scena.push_back(Sole);	// 2
+	Scena.push_back(Palla); // 3
 
 	wings.nTriangles = 80;
 	col_top = {0.2, 0.01, 0.05, 1.0};
@@ -147,6 +153,13 @@ void INIT_VAO(void)
 	character.addBodypart(eye2, -1, 6, 0, 0.2);
 	character.addBodypart(catCloth, 0, 0.2, 0, 1.5);
 
+	col_top = {1.0, 0.6, 0.0, 1.0};
+	col_bottom = {1.0, 0.2, 0.0, 1.0};
+	costruisci_personaggio("res/head.txt", col_top, col_bottom, &head);
+	crea_VAO_Vector(&head);
+	costruisci_personaggio("res/body.txt", col_top, col_bottom, &body);
+	crea_VAO_Vector(&body);
+
 	player.addBodypart(body, 0, 0, 0, 0.001);
 	// player.addBodypart(wings, 0, 0, 0, 3);
 	player.addBodypart(body);
@@ -156,7 +169,7 @@ void INIT_VAO(void)
 	player.addBodypart(eye2, -1, 6, 0, 0.2);
 	// player.addBodypart(catCloth, 0, 0.2, 0, 1.5);
 
-	// Costruzione della matrice di Proiezione
+	// Costruzione della matrice di Proiezione per scena
 	Projection = ortho(0.0f, float(width), 0.0f, float(height));
 	MatProj = glGetUniformLocation(programId, "Projection");
 	MatModel = glGetUniformLocation(programId, "Model");
@@ -166,11 +179,14 @@ void INIT_VAO(void)
 	playerPos = glGetUniformLocation(programId, "playerPos");
 	playerHP = glGetUniformLocation(programId, "playerHp");
 
+	// creation of matrices for objects
+	MatProj1 = glGetUniformLocation(programId1, "Projection");
+	MatModel1 = glGetUniformLocation(programId1, "Model");
+
 	// add bounding boxes to objects
 	for (int i = 0; i < nEnemy; i++)
 	{
 		posProjectiles.push_back(vec3(0, 0, 0));
-
 		projectiles[i].addVertices(Palla.vertici);
 		boundingBoxesProjectile.push_back(projectiles[i]);
 	}
@@ -182,7 +198,7 @@ void drawScene(void)
 	int k;
 	glClearColor(0.0, 0.0, 0.0, 0.5);
 	glClear(GL_COLOR_BUFFER_BIT);
-	glUniformMatrix4fv(MatProj, 1, GL_FALSE, value_ptr(Projection));
+	
 
 	// Disegno Cielo
 
@@ -190,28 +206,23 @@ void drawScene(void)
 	vec2 resolution = vec2((float)width, (float)height);
 
 	glUseProgram(programId);
+	glUniformMatrix4fv(MatProj, 1, GL_FALSE, value_ptr(Projection));
 	glUniform1f(loctime, time);
 	glUniform2f(locres, resolution.x, resolution.y);
 	glUniform1f(playerHP, playerHp);
-	float fadeAmount = 3;
 
 	float distacco_da_terra_n = -distacco_da_terra;
 	float sun_scale = lerp(0.1, 0.8, (float)distacco_da_terra_n / 255);
-
-	float shadow_scale = lerp(1, 0, (float)distacco_da_terra_n / 255);
-	if (shadow_scale < 0)
-		shadow_scale = 0;
 
 	float bwidth = distacco_da_terra_n < 0 ? lerp(80, 100, (float)abs(distacco_da_terra_n) / 20) : 80; // larghezza effettiva in pixel della palla
 	float bheight = distacco_da_terra_n < 0 ? 80 + distacco_da_terra_n : 80;						   // altezza effettiva in pixel della palla
 
 	// glUseProgram(programId1);
-	glUniform1f(colorLerp, (float)lerp(0.68, 1.0, (float)distacco_da_terra_n / 255));
-
+	glUniform1f(colorLerp, (float)lerp(0.58, 1.0, (float)distacco_da_terra_n / 255));
 	glUniform2f(playerPos, posx - bwidth / 2, posy + bheight / 2 + distacco_da_terra_n);
+
 	for (k = 0; k < Scena.size(); k++)
 	{
-
 		if (k == 2)
 		{
 			// sole
@@ -221,7 +232,7 @@ void drawScene(void)
 			Scena[k].Model = scale(Scena[k].Model, vec3(1, sun_scale, 1.0));
 		}
 
-		glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(Scena[k].Model));
+		glUniformMatrix4fv(MatModel1, 1, GL_FALSE, value_ptr(Scena[k].Model));
 		glBindVertexArray(Scena[k].VAO);
 
 		if (k == 2)
@@ -233,6 +244,8 @@ void drawScene(void)
 		glBindVertexArray(0);
 	}
 
+	glUseProgram(programId1);
+	glUniformMatrix4fv(MatProj1, 1, GL_FALSE, value_ptr(Projection));
 	// draw enemies
 	for (int i = 0; i < nEnemy; i++)
 	{
@@ -247,7 +260,7 @@ void drawScene(void)
 		character.animation(1, sin(time * 3 + 10 * i), 1);
 		character.translateBodyPart();
 		character.scaleAll(40, 40);
-		character.draw(MatModel);
+		character.draw(MatModel1);
 	}
 
 	// draw player
@@ -255,12 +268,11 @@ void drawScene(void)
 	// splayer.animation(1, sin(time*3), 1);
 	player.translateBodyPart();
 	player.scaleAll(40, 40);
-	player.draw(MatModel);
+	player.draw(MatModel1);
 	boundingBoxPlayer.updateModel(player.getBodyPartsModel(1));
 
 	glBindVertexArray(0);
 	int indexK = 3;
-	// Palla ed Ombra
 	glBindVertexArray(Scena[indexK].VAO);
 	// matrice di Trasformazione della Palla
 	for (int i = 0; i < nEnemy; i++)
@@ -268,7 +280,8 @@ void drawScene(void)
 		Scena[indexK].Model = mat4(1.0);
 		Scena[indexK].Model = translate(Scena[indexK].Model, vec3(posProjectiles[i].x, posProjectiles[i].y, 0.0f));
 		Scena[indexK].Model = scale(Scena[indexK].Model, vec3(10 + time, 10 + time, 1.0));
-		glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(Scena[indexK].Model));
+
+		glUniformMatrix4fv(MatModel1, 1, GL_FALSE, value_ptr(Scena[indexK].Model));
 		if (boundingBoxesProjectile[i].isAlive())
 			glDrawArrays(GL_TRIANGLE_FAN, 0, (Scena[indexK].vertici.size()));
 		boundingBoxesProjectile[i].updateModel(Scena[indexK].Model);
@@ -288,7 +301,7 @@ int main(int argc, char *argv[])
 
 	glutInitWindowSize(width, height);
 	glutInitWindowPosition(100, 100);
-	glutCreateWindow("Scena OpenGL");
+	glutCreateWindow("first assignment song zhaohui");
 	glutDisplayFunc(drawScene);
 
 	glutKeyboardFunc(keyboardPressedEvent);

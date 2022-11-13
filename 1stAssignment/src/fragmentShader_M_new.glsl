@@ -23,8 +23,8 @@ void main()
 // Convert screen coorzates to normalized device coordinates (NDC)
  
     vec2 ndc = vec2((gl_FragCoord.x / resolution.x - 0.5) * 2, (gl_FragCoord.y / resolution.y - 0.5) * 2);
-    vec2 PlayerPosNdc = vec2((playerPos.x / resolution.x - 0.5) * 2, (playerPos.y / resolution.y - 0.5) * 2);
-    float playerDis = distance(ndc.xy, PlayerPosNdc.xy);
+  //  vec2 PlayerPosNdc = vec2((playerPos.x / resolution.x - 0.5) * 2, (playerPos.y / resolution.y - 0.5) * 2);
+//    float playerDis = distance(ndc.xy, PlayerPosNdc.xy);
     
    if(ndc.y > 0 && ndc.y < 1)
      {
@@ -32,7 +32,8 @@ void main()
       
     }
     else if(ndc.y > -0.95 && ndc.y < - 0.8 && ndc.x > -0.95 && ndc.x < playerHp){
-      FragColor = vec4(1.0, 0.2, 0.2, 1.0);
+      float hpColor = playerHp < 0.2 ? 0.2 : playerHp;
+      FragColor = vec4(1.0,  hpColor , hpColor, 1.0);
     }
     else{ 
        FragColor = ourColor;
