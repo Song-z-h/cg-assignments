@@ -55,10 +55,10 @@ void main()
 {
 // Convert screen coorzates to normalized device coordinates (NDC)
     vec2 ndc = vec2((gl_FragCoord.x / resolution.x - 0.5) * 2, (gl_FragCoord.y / resolution.y - 0.5) * 2);
-    vec2 PlayerPosNdc = vec2((playerPos.x / resolution.x - 0.5) * 2, ((playerPos.y + 80)/ resolution.y - 0.5) * 2);
+    vec2 PlayerPosNdc = vec2((playerPos.x / resolution.x - 0.5) * 2, ((playerPos.y + 135)/ resolution.y - 0.5) * 2);
     float n0 = noise(ndc.x * 1.18, 0.7);
     float playerDis = distance(ndc.xy, PlayerPosNdc.xy);
-    if(abs(playerDis) < 0.02){
+    if(abs(playerDis) < 0.06 && abs(playerDis) > 0.02 ){
       FragColor = vec4(1.0, 1.0, 0, 1);
     }
  // hp bar

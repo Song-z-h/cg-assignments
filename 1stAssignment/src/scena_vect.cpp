@@ -62,6 +62,7 @@ BoundingBox projectiles[nEnemy];			 // single boundingBoxes of bullets
 float playerHp = 1;							 // player hp bar ranging from -1 to 1
 float bulletDamage = 0.2;					 // the dmg
 float projectileSpeed = 10;
+vector<vec3> scaleEnemies;	
 
 void INIT_SHADER(void)
 {
@@ -187,6 +188,7 @@ void INIT_VAO(void)
 	for (int i = 0; i < nEnemy; i++)
 	{
 		posProjectiles.push_back(vec3(0, 0, 0));
+		scaleEnemies.push_back(vec3(1, 1, 1));
 		projectiles[i].addVertices(Palla.vertici);
 		boundingBoxesProjectile.push_back(projectiles[i]);
 	}
@@ -257,17 +259,21 @@ void drawScene(void)
 		}
 
 		character.translateMainBody(getXFromButterfly(time / 2 + 100 * i) * 70 + 0.8 * width, 300 + getYFromButterfly(time / 2 + 100 * i) * 70);
-		character.animation(1, sin(time * 3 + 10 * i), 1);
 		character.translateBodyPart();
+		character.animation(1, sin(time * 3 + 10 * i), 1);
+		character.scaleOne(1 ,scaleEnemies[i].x, scaleEnemies[i].y);
+		//character.animation(5, 1, abs(sin(time*3 + 10 * i)));
+		//character.animation(6, 1, abs(sin(time*3 + 10 * i)));
 		character.scaleAll(40, 40);
 		character.draw(MatModel1);
 	}
 
 	// draw player
 	player.translateMainBody(posx - bwidth / 2, posy + bheight / 2 + distacco_da_terra_n, 0.0f);
-	// splayer.animation(1, sin(time*3), 1);
 	player.translateBodyPart();
-	player.scaleAll(40, 40);
+	player.animation(4, 1, abs(sin(time*3)));
+	player.animation(5, 1, abs(sin(time*3)));
+	player.scaleAll(60, 60);
 	player.draw(MatModel1);
 	boundingBoxPlayer.updateModel(player.getBodyPartsModel(1));
 

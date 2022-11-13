@@ -18,6 +18,8 @@ extern vector<BoundingBox> boundingBoxesProjectile;
 extern BoundingBox boundingBoxPlayer;
 extern float playerHp;
 extern float bulletDamage;
+extern vector<vec3> scaleEnemies;	
+
 
 void keyboardPressedEvent(unsigned char key, int x, int y)
 {
@@ -173,6 +175,8 @@ void update_projectiles(int a)
 		{
 			playerHp -= bulletDamage;
 			boundingBoxesProjectile[i].setAlive(false);
+			scaleEnemies[i].x *= 1.5;
+			scaleEnemies[i].y *= 1.5;
 		}
 		if (playerHp <= -0.99)
 		{
