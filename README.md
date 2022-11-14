@@ -15,5 +15,6 @@ make
 
 In windows with visual studio:
 
-- You can figure it out yourself.
-
+```
+You can figure it out yourself.
+```
