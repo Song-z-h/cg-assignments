@@ -16,5 +16,6 @@ make
 In windows with visual studio:
 
 ```
-You can figure it out yourself.
+ //install package "nupengl.core" and "glm" and import header files and cpp files in corresponding places. 
+ //try to run the program with 64-bit if neccessary.
 ```
