@@ -60,7 +60,7 @@ vector<BoundingBox> boundingBoxesProjectile; // bounding boxes for bullets
 BoundingBox boundingBoxPlayer;				 // bunding box to update player
 BoundingBox projectiles[nEnemy];			 // single boundingBoxes of bullets
 float playerHp = 1;							 // player hp bar ranging from -1 to 1
-float bulletDamage = 0.2;					 // the dmg
+float bulletDamage = 0.1;					 // the dmg
 float projectileSpeed = 10;
 vector<vec3> scaleEnemies;	
 
@@ -188,7 +188,7 @@ void INIT_VAO(void)
 	for (int i = 0; i < nEnemy; i++)
 	{
 		posProjectiles.push_back(vec3(0, 0, 0));
-		scaleEnemies.push_back(vec3(1, 1, 1));
+		scaleEnemies.push_back(vec3(1, 1	, 1));
 		projectiles[i].addVertices(Palla.vertici);
 		boundingBoxesProjectile.push_back(projectiles[i]);
 	}

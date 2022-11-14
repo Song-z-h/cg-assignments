@@ -175,8 +175,8 @@ void update_projectiles(int a)
 		{
 			playerHp -= bulletDamage;
 			boundingBoxesProjectile[i].setAlive(false);
-			scaleEnemies[i].x *= 1.5;
-			scaleEnemies[i].y *= 1.5;
+			scaleEnemies[i].x *= 1.2;
+			scaleEnemies[i].y *= 1.2;
 		}
 		if (playerHp <= -0.99)
 		{
