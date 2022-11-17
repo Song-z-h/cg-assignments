@@ -6,13 +6,14 @@ static unsigned int programId, programId1;// scene and characters
 
 // for programId
 mat4 Projection;
-GLuint MatProj, MatModel, loctime, locres, colorLerp, playerPos, playerHP;
+GLuint MatProj, MatModel, loctime, locres, colorLerp, playerPos, playerHP, originalResolution;
 
 // for programId1
 GLuint MatProj1, MatModel1;
 
 int nv_P;
 // viewport size
+int w_update = 1400, h_update = 800;
 int width = 1400;
 int height = 800;
 
@@ -56,7 +57,7 @@ float angolo = 0.0;
 const int nEnemy = 5; // the number of fairies
 
 vector<vec3> posProjectiles;				 // posiiton used to update bullets
-vector<BoundingBox> boundingBoxesProjectile; // bounding boxes for bullets
+vector<BoundingBox> 	boundingBoxesProjectile; // bounding boxes for bullets
 BoundingBox boundingBoxPlayer;				 // bunding box to update player
 BoundingBox projectiles[nEnemy];			 // single boundingBoxes of bullets
 float playerHp = 1;							 // player hp bar ranging from -1 to 1
@@ -171,11 +172,11 @@ void INIT_VAO(void)
 	// player.addBodypart(catCloth, 0, 0.2, 0, 1.5);
 
 	// Costruzione della matrice di Proiezione per scena
-	Projection = ortho(0.0f, float(width), 0.0f, float(height));
 	MatProj = glGetUniformLocation(programId, "Projection");
 	MatModel = glGetUniformLocation(programId, "Model");
 	loctime = glGetUniformLocation(programId, "time");
 	locres = glGetUniformLocation(programId, "resolution");
+	originalResolution =  glGetUniformLocation(programId, "originalResolution");
 	colorLerp = glGetUniformLocation(programId, "colorLerp");
 	playerPos = glGetUniformLocation(programId, "playerPos");
 	playerHP = glGetUniformLocation(programId, "playerHp");
@@ -205,13 +206,14 @@ void drawScene(void)
 	// Disegno Cielo
 
 	float time = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
-	vec2 resolution = vec2((float)width, (float)height);
+	vec2 resolution = vec2((float)w_update, (float)h_update);
 
 	glUseProgram(programId);
 	glUniformMatrix4fv(MatProj, 1, GL_FALSE, value_ptr(Projection));
 	glUniform1f(loctime, time);
 	glUniform2f(locres, resolution.x, resolution.y);
 	glUniform1f(playerHP, playerHp);
+	glUniform2f(originalResolution, width, height);
 
 	float distacco_da_terra_n = -distacco_da_terra;
 	float sun_scale = lerp(0.1, 0.8, (float)distacco_da_terra_n / 255);
@@ -296,6 +298,23 @@ void drawScene(void)
 	glutSwapBuffers();
 }
 
+void resizeWindow(int w, int h){
+	Projection = ortho(0.0f, float(width), 0.0f, float(height));	
+	float windowRatio = (float)width/ (float)height;
+
+	if(windowRatio > w /h){
+		//width is less than original aspect ratio, then we reduce the scrren with width
+		glViewport(0, 0, w, w / windowRatio);
+		w_update = (float)w;
+		h_update = w / windowRatio;
+	}else{
+		//width is more, then we resize the window with height
+		glViewport(0, 0, h * windowRatio, h);
+		w_update = h * windowRatio;
+		h_update = (float)h;
+	}
+}
+
 int main(int argc, char *argv[])
 {
 	glutInit(&argc, argv);
@@ -309,7 +328,7 @@ int main(int argc, char *argv[])
 	glutInitWindowPosition(100, 100);
 	glutCreateWindow("first assignment song zhaohui");
 	glutDisplayFunc(drawScene);
-
+	glutReshapeFunc(resizeWindow);
 	glutKeyboardFunc(keyboardPressedEvent);
 	// Evento tastiera tasto rilasciato
 

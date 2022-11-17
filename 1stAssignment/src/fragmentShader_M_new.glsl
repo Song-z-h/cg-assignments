@@ -8,6 +8,7 @@ in vec4 ourColor;
 out vec4 FragColor;  
 uniform float time;
 uniform vec2 resolution;
+uniform vec2 originalResolution;
 uniform float colorLerp;
 uniform vec2 playerPos;
     //playerHP is from 0% to 100%, i need the x to be from -1 to 0.95 
@@ -55,7 +56,7 @@ void main()
 {
 // Convert screen coorzates to normalized device coordinates (NDC)
     vec2 ndc = vec2((gl_FragCoord.x / resolution.x - 0.5) * 2, (gl_FragCoord.y / resolution.y - 0.5) * 2);
-    vec2 PlayerPosNdc = vec2((playerPos.x / resolution.x - 0.5) * 2, ((playerPos.y + 135)/ resolution.y - 0.5) * 2);
+    vec2 PlayerPosNdc = vec2((playerPos.x / originalResolution.x - 0.5) * 2, ((playerPos.y + 135)/ originalResolution.y - 0.5) * 2);
     float n0 = noise(ndc.x * 1.18, 0.7);
     float playerDis = distance(ndc.xy, PlayerPosNdc.xy);
     if(abs(playerDis) < 0.06 * colorLerp && abs(playerDis) > 0.02 ){
