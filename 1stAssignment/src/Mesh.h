@@ -79,6 +79,16 @@ public:
             glBindVertexArray(0);
         }
     }
+
+    vector<vec3> getAllVertices(){
+        vector<vec3> vertices;
+        for(int i = 0; i < bodyParts.size(); i++){
+            for(int j = 0; j < bodyParts[i].vertici.size(); j++){
+                vertices.push_back(bodyParts[i].vertici[j]);
+            }
+        }
+        return vertices;
+    }
     void addBodypart(Figura &body, float offsetX = 0, float offsetY = 0, float offsetZ = 0.0,
                      float scale = 1)
     {

@@ -147,7 +147,7 @@ void INIT_VAO(void)
 	crea_VAO_Vector(&eye2);
 
 	character.addBodypart(body, 0, 0, 0, 0.001);
-	character.addBodypart(wings, 0, 0, 0, 3);
+	character.addBodypart(wings, 0, 0, 0, 3.5);
 	character.addBodypart(body);
 	character.addBodypart(head, -0.1, 1, 0);
 	character.addBodypart(nose, 0, 4.2, 0, 0.2);
@@ -164,7 +164,7 @@ void INIT_VAO(void)
 
 	player.addBodypart(body, 0, 0, 0, 0.001);
 	// player.addBodypart(wings, 0, 0, 0, 3);
-	player.addBodypart(body);
+	player.addBodypart(body, 0, 0, 0, 1.3);
 	player.addBodypart(head, -0.1, 1, 0);
 	player.addBodypart(nose, 0, 4.2, 0, 0.2);
 	player.addBodypart(eye1, 1, 6, 0, 0.2);
@@ -189,11 +189,13 @@ void INIT_VAO(void)
 	for (int i = 0; i < nEnemy; i++)
 	{
 		posProjectiles.push_back(vec3(0, 0, 0));
-		scaleEnemies.push_back(vec3(1, 1	, 1));
+		scaleEnemies.push_back(vec3(1, 1, 1));
 		projectiles[i].addVertices(Palla.vertici);
 		boundingBoxesProjectile.push_back(projectiles[i]);
 	}
-	boundingBoxPlayer.addVertices(body.vertici);
+	boundingBoxPlayer.addVertices(player.getAllVertices());
+
+	
 }
 void drawScene(void)
 {
