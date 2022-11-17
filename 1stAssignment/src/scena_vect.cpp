@@ -32,6 +32,9 @@ float posy = float(height) * 0.2;
 bool pressing_left = false;
 bool pressing_right = false;
 bool jumping = false;
+bool playerCrying = false;
+float lastAnimationFrame = 0;
+float timer = 0;
 
 Figura Cielo = {};
 Figura Prato = {};
@@ -104,7 +107,7 @@ void INIT_VAO(void)
 	col_bottom = {1.0, 0.8, 0.0, 1.0};
 	vec4 col_top_ombra = {0.49, 0.49, 0.49, 0.0};
 	vec4 col_bottom_ombra = {0.0, 0.0, 0.0, 0.6};
-	costruisci_palla(col_top, col_bottom, col_top_ombra, col_bottom_ombra, &Palla);
+	costruisci_cuore(0, 0, 1, 1, &Palla, col_top);
 	crea_VAO_Vector(&Palla);
 
 	// order of scene objects
@@ -161,15 +164,29 @@ void INIT_VAO(void)
 	crea_VAO_Vector(&head);
 	costruisci_personaggio("res/body.txt", col_top, col_bottom, &body);
 	crea_VAO_Vector(&body);
+	catCloth.nTriangles = 4;
+	col_top = {0.0, 0.0, 0.9, 1.0};
+	col_bottom = {0.0, 1.0, 1.0, 0.3};
+	costruisci_farfalla(0, 0, 1, 1, col_top, col_bottom, &catCloth);
+	crea_VAO_Vector(&catCloth);
+
 
 	player.addBodypart(body, 0, 0, 0, 0.001);
 	// player.addBodypart(wings, 0, 0, 0, 3);
+	player.addBodypart(catCloth, 0, 0.2, 0, 3);
 	player.addBodypart(body, 0, 0, 0, 1.3);
 	player.addBodypart(head, -0.1, 1, 0);
 	player.addBodypart(nose, 0, 4.2, 0, 0.2);
 	player.addBodypart(eye1, 1, 6, 0, 0.2);
 	player.addBodypart(eye2, -1, 6, 0, 0.2);
-	// player.addBodypart(catCloth, 0, 0.2, 0, 1.5);
+
+	col_top = {0.0, 0.0, 0.9, 1.0};
+	col_bottom = {0.0, 1.0, 1.0, 0.3};
+	catCloth.nTriangles = 20;
+	costruisci_farfalla(0, 0, 1, 1, col_top, col_bottom, &catCloth);
+	crea_VAO_Vector(&catCloth);
+	player.addBodypart(catCloth, 0, 0.2, 0, 1);
+
 
 	// Costruzione della matrice di Proiezione per scena
 	MatProj = glGetUniformLocation(programId, "Projection");
@@ -193,7 +210,7 @@ void INIT_VAO(void)
 		projectiles[i].addVertices(Palla.vertici);
 		boundingBoxesProjectile.push_back(projectiles[i]);
 	}
-	boundingBoxPlayer.addVertices(player.getAllVertices());
+	boundingBoxPlayer.addVertices(body.vertici);
 
 	
 }
@@ -207,12 +224,12 @@ void drawScene(void)
 
 	// Disegno Cielo
 
-	float time = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
+	timer = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
 	vec2 resolution = vec2((float)w_update, (float)h_update);
 
 	glUseProgram(programId);
 	glUniformMatrix4fv(MatProj, 1, GL_FALSE, value_ptr(Projection));
-	glUniform1f(loctime, time);
+	glUniform1f(loctime, timer);
 	glUniform2f(locres, resolution.x, resolution.y);
 	glUniform1f(playerHP, playerHp);
 	glUniform2f(originalResolution, width, height);
@@ -257,17 +274,17 @@ void drawScene(void)
 	{
 		if (posProjectiles[i].x < 0)
 		{
-			posProjectiles[i].x = getXFromButterfly(time / 2 + 100 * i) * 70 + 0.8 * width;
-			posProjectiles[i].y = 300 + getYFromButterfly(time / 2 + 100 * i) * 70;
+			posProjectiles[i].x = getXFromButterfly(timer / 2 + 100 * i) * 70 + 0.8 * width;
+			posProjectiles[i].y = 300 + getYFromButterfly(timer / 2 + 100 * i) * 70;
 			boundingBoxesProjectile[i].setAlive(true);
 		}
 
-		character.translateMainBody(getXFromButterfly(time / 2 + 100 * i) * 70 + 0.8 * width, 300 + getYFromButterfly(time / 2 + 100 * i) * 70);
+		character.translateMainBody(getXFromButterfly(timer / 2 + 100 * i) * 70 + 0.8 * width, 300 + getYFromButterfly(timer / 2 + 100 * i) * 70);
 		character.translateBodyPart();
-		character.animation(1, sin(time * 3 + 10 * i), 1);
+		character.animation(1, sin(timer * 3 + 10 * i), 1);
 		character.scaleOne(1 ,scaleEnemies[i].x, scaleEnemies[i].y);
-		//character.animation(5, 1, abs(sin(time*3 + 10 * i)));
-		//character.animation(6, 1, abs(sin(time*3 + 10 * i)));
+		//character.animation(5, 1, abs(sin(timer*3 + 10 * i)));
+		//character.animation(6, 1, abs(sin(timer*3 + 10 * i)));
 		character.scaleAll(40, 40);
 		character.draw(MatModel1);
 	}
@@ -275,11 +292,16 @@ void drawScene(void)
 	// draw player
 	player.translateMainBody(posx - bwidth / 2, posy + bheight / 2 + distacco_da_terra_n, 0.0f);
 	player.translateBodyPart();
-	player.animation(4, 1, abs(sin(time*3)));
-	player.animation(5, 1, abs(sin(time*3)));
+	//animation of eyes only for some timer
+	if(playerCrying){
+		player.animation(4, 1, abs(sin(timer*3)));
+		player.animation(5, 1, abs(sin(timer*3)));
+		if(timer - lastAnimationFrame > 2)
+			playerCrying = false;
+	}
 	player.scaleAll(60, 60);
 	player.draw(MatModel1);
-	boundingBoxPlayer.updateModel(player.getBodyPartsModel(1));
+	boundingBoxPlayer.updateModel(player.getBodyPartsModel(2));
 
 	glBindVertexArray(0);
 	int indexK = 3;
@@ -289,7 +311,7 @@ void drawScene(void)
 	{
 		Scena[indexK].Model = mat4(1.0);
 		Scena[indexK].Model = translate(Scena[indexK].Model, vec3(posProjectiles[i].x, posProjectiles[i].y, 0.0f));
-		Scena[indexK].Model = scale(Scena[indexK].Model, vec3(10 + time, 10 + time, 1.0));
+		Scena[indexK].Model = scale(Scena[indexK].Model, vec3(10 + timer, 10 + timer, 1.0));
 
 		glUniformMatrix4fv(MatModel1, 1, GL_FALSE, value_ptr(Scena[indexK].Model));
 		if (boundingBoxesProjectile[i].isAlive())

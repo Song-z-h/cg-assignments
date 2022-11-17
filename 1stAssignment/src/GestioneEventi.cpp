@@ -19,6 +19,8 @@ extern BoundingBox boundingBoxPlayer;
 extern float playerHp;
 extern float bulletDamage;
 extern vector<vec3> scaleEnemies;	
+extern bool playerCrying;
+extern float timer, lastAnimationFrame;
 
 
 void keyboardPressedEvent(unsigned char key, int x, int y)
@@ -177,6 +179,9 @@ void update_projectiles(int a)
 			boundingBoxesProjectile[i].setAlive(false);
 			scaleEnemies[i].x *= 1.2;
 			scaleEnemies[i].y *= 1.2;
+
+			playerCrying = true;
+			lastAnimationFrame = timer;
 		}
 		if (playerHp <= -0.99)
 		{
