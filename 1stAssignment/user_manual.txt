@@ -1,0 +1,6 @@
+Il gioco consiste nel controllare il gatto con il vestito blu elettrico,si devono schivare i cuori sparati dai nemici, ovvero i gatti che volano sul lato destro con bellissime ali di farfalla. Una volta che il gatto blu viene colpito,e fa l'occhiolino e subisce un danno. La barra in basso indica la vita rimasta. Il gioco continua fino all'esaurimento dei punti vita del giocatore.
+Il movimento viene controllato premendo "A" e "D" per spostarsi in orizzontale, "spazio" per saltare in verticale.
+
+
+The objective of the game lies in a player controlling the cat with a blue-bedazzled outfit, to dodge hearts emitted by the enemies --- cats flying on the right side with beautiful butterfly wings. Once the player gets hit by one heart, the blue cat gets charmed and winks, and on top of that, gets damage which is visualized on the bottom bar. 
+The game continues until the hp of the player exhausts, the movement can be controlled by pressing 'A', and 'D' to move horizontally, and 'space' to jump vertically.
