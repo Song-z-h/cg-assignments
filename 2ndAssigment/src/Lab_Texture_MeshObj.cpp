@@ -11,6 +11,7 @@
 #include "gestione_telecamera.h"
 #include "Strutture.h"
 #include "enum.h"
+
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
 string Meshdir = "Meshes/";
@@ -18,8 +19,8 @@ string Imagedir = "Textures/";
 string SkyboxDir = "Skybox/";
 
 bool visualizzaAncora = false;
-int width = 1024;
-int height = 800;
+int width = 1440;
+int height = 1000;
 
 // Gestione Mouse
 
@@ -64,12 +65,19 @@ vector<std::string> faces{
 		"bottom.jpg",
 		"front.jpg",
 		"back.jpg"*/
-	SkyboxDir + "posx.jpg",
+		SkyboxDir + "right.png",
+		SkyboxDir + "left.png",
+		SkyboxDir + "top.png",
+		SkyboxDir + "bottom.png",
+		SkyboxDir + "back.png",
+		SkyboxDir + "front.png"
+	/*SkyboxDir + "posx.jpg",
 	SkyboxDir + "negx.jpg",
 	SkyboxDir + "posy.jpg",
 	SkyboxDir + "negy.jpg",
 	SkyboxDir + "posz.jpg",
-	SkyboxDir + "negz.jpg"};
+	SkyboxDir + "negz.jpg" */
+	};
 
 // loads a cubemap texture from 6 individual texture faces
 // order:
@@ -266,7 +274,7 @@ void INIT_VAO(void)
 	string name = "muromattoni.jpg";
 	string path = Imagedir + name;
 	texture = loadTexture(path.c_str(), 0);
-	name = "steve.jpg";
+	name = "grass.jpg";
 	path = Imagedir + name;
 	texture1 = loadTexture(path.c_str(), 0);
 
@@ -275,7 +283,7 @@ void INIT_VAO(void)
 	crea_cubo(&Sky);
 	crea_VAO_Vector(&Sky);
 	Scena.push_back(Sky);
-
+{
 	// Sfera
 	crea_sfera(&Sfera, vec4(1.0, 0.0, 0.0, 1.0));
 	crea_VAO_Vector(&Sfera);
@@ -327,14 +335,15 @@ void INIT_VAO(void)
 	Toro.material = MaterialType::BRASS;
 	Toro.ancora_obj = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	Scena.push_back(Toro);
+}
 
-	crea_piano(&Pannello, vec4(0.2, 0.2, 0.9, 1.0));
+	crea_piano_suddiviso(&Pannello, vec4(0.0, 0.0, 0.0, 1.0), 100, 100);
 	crea_VAO_Vector(&Pannello);
 	Pannello.nome = "Pannello";
 	Pannello.ModelM = mat4(1.0);
-	Pannello.ModelM = translate(Pannello.ModelM, vec3(-7.0, 8.0, -2.0));
-	Pannello.ModelM = scale(Pannello.ModelM, vec3(5.0f, 5.0f, 5.0f));
-	Pannello.ModelM = rotate(Pannello.ModelM, radians(90.0f), vec3(1.0, 0.0, 0.0));
+	Pannello.ModelM = translate(Pannello.ModelM, vec3(-7.0, -100.0, -2.0));
+	Pannello.ModelM = scale(Pannello.ModelM, vec3(10000, 1, 10000));
+	//Pannello.ModelM = rotate(Pannello.ModelM, radians(90.0f), vec3(1.0, 0.0, 0.0));
 	Pannello.sceltaVS = 1;
 	Pannello.sceltaFS = 1;
 	Pannello.material = MaterialType::EMERALD;
@@ -360,7 +369,7 @@ void INIT_VAO(void)
 			Model3D[i].ancora_obj = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 		}
 
-		 ScenaObj.push_back(Model3D);
+//		 ScenaObj.push_back(Model3D);
 
 		Model3D.clear();
 
@@ -424,7 +433,7 @@ void INIT_VAO(void)
 			Model3D[i].sceltaVS = 1;
 			Model3D[i].sceltaFS = 5;
 		}
-		// ScenaObj.push_back(Model3D);
+		ScenaObj.push_back(Model3D);
 
 		Model3D.clear();
 

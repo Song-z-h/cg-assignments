@@ -35,7 +35,7 @@ void main()
     {
     //Shading interpolativo
     
-      FragColor=mix(ourColor,texture(id_tex,vec2(frag_coord_st.x,frag_coord_st.y)),0.3);
+      FragColor=mix(ourColor,texture(id_tex,vec2(frag_coord_st.x,frag_coord_st.y) * 40),0.9);
       }         
        else if (sceltaFS==3)
 	 {
