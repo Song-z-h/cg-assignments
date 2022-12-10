@@ -155,6 +155,24 @@ void crea_piano(Mesh *mesh, vec4 color)
 	mesh->indici.push_back(nv - 1);
 }
 
+float getNoise(int x, int z, int seed = 10)
+{
+	srand(x * 2421 + z * 3242 + seed);
+	return rand() % 2 - 1;
+}
+
+float getSmoothNoise(int x, int z, int seed = 10)
+{
+	float cornes = (getNoise(x - 1, z - 1) + getNoise(x + 1, z - 1) +
+					getNoise(x - 1, z + 1) + getNoise(x + 1, z + 1)) /
+				   16.0f;
+	float sides = (getNoise(x - 1, z) + getNoise(x + 1, z) +
+				   getNoise(x, z + 1) + getNoise(x, z - 1)) /
+				  8.0f;
+	float center = getNoise(x, z) / 4.0f;
+	return cornes + sides + center;
+}
+
 void crea_piano_suddiviso(Mesh *mesh, vec4 color, int height, int N = 100)
 {
 	int i, j;
@@ -163,8 +181,8 @@ void crea_piano_suddiviso(Mesh *mesh, vec4 color, int height, int N = 100)
 	{
 		for (j = 0; j < N; j++)
 		{
-			srand(i * 2421 + j * 3242);
-			float randHeight = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * height;
+
+			float randHeight = getSmoothNoise(i, j, 100) * height;
 			mesh->vertici.push_back(vec3(-0.5 + (float)i / N, randHeight, -0.5 + (float)j / N));
 			mesh->colori.push_back(color);
 			mesh->normali.push_back(vec3(0.0, 1.0, 0.0));

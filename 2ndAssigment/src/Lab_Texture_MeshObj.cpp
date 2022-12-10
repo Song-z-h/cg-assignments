@@ -30,7 +30,7 @@ bool moving_trackball = 0;
 bool firstMouse = true;
 float lastX = (float)width / 2;
 float lastY = (float)height / 2;
-
+float timer = 0;
 float angolo = 0.0;
 // Varibili per il reshape
 int w_up = width;
@@ -41,12 +41,15 @@ static vector<MeshObj> Model3D;
 string stringa_asse;
 float cameraSpeed = 0.1;
 
+float skyRotationSpeed = 0.003f;
+float skyRotation = 0;
+
 // variabili per la comunicazione delle variabili uniformi con gli shader
 static unsigned int programId, programId_text, programId1, MatrixProj, MatModel, MatView;
 static unsigned int lsceltaFS, lsceltaVS, loc_texture, MatViewS, MatrixProjS;
 static unsigned int loc_view_pos, MatModelR, MatViewR, MatrixProjR, loc_view_posR, loc_cubemapR;
 
-unsigned int idTex, texture, texture1, cubemapTexture, programIdr;
+unsigned int idTex, texture, texture1, cubemapTexture, programIdr, loctime;
 
 float raggio_sfera = 2.5;
 
@@ -67,16 +70,10 @@ vector<std::string> faces{
 		"back.jpg"*/
 		SkyboxDir + "right.png",
 		SkyboxDir + "left.png",
-		SkyboxDir + "top.png",
+		SkyboxDir + "top.jpg",
 		SkyboxDir + "bottom.png",
 		SkyboxDir + "back.png",
 		SkyboxDir + "front.png"
-	/*SkyboxDir + "posx.jpg",
-	SkyboxDir + "negx.jpg",
-	SkyboxDir + "posy.jpg",
-	SkyboxDir + "negy.jpg",
-	SkyboxDir + "posz.jpg",
-	SkyboxDir + "negz.jpg" */
 	};
 
 // loads a cubemap texture from 6 individual texture faces
@@ -337,7 +334,7 @@ void INIT_VAO(void)
 	Scena.push_back(Toro);
 }
 
-	crea_piano_suddiviso(&Pannello, vec4(0.0, 0.0, 0.0, 1.0), 100, 100);
+	crea_piano_suddiviso(&Pannello, vec4(0.0, 0.0, 0.0, 1.0), 200, 100);
 	crea_VAO_Vector(&Pannello);
 	Pannello.nome = "Pannello";
 	Pannello.ModelM = mat4(1.0);
@@ -521,18 +518,21 @@ void resize(int w, int h)
 
 void drawScene(void)
 {
-
 	glUniformMatrix4fv(MatrixProj, 1, GL_FALSE, value_ptr(Projection));
 	View = lookAt(vec3(ViewSetup.position), vec3(ViewSetup.target), vec3(ViewSetup.upVector));
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	timer = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
 	// Disegno Sky box
 
 	glDepthMask(GL_FALSE);
 	glUseProgram(programId1);
+	glUniform1f(loctime, timer);	
 	glUniform1i(glGetUniformLocation(programId1, "skybox"), 0);
 	glUniformMatrix4fv(MatrixProjS, 1, GL_FALSE, value_ptr(Projection));
-	glUniformMatrix4fv(MatViewS, 1, GL_FALSE, value_ptr(View));
+	skyRotation += skyRotationSpeed * timer;
+	mat4 skyview = rotate(View, radians(skyRotation), vec3(0, 1, 0));
+	glUniformMatrix4fv(MatViewS, 1, GL_FALSE, value_ptr(skyview));
 	// skybox cube
 	glBindVertexArray(Scena[0].VAO);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
@@ -741,6 +741,7 @@ int main(int argc, char *argv[])
 	// Chiedo che mi venga restituito l'identificativo della variabile uniform mat4 Model (in vertex shader)
 	// QUesto identificativo sar� poi utilizzato per il trasferimento della matrice Model al Vertex Shader
 	MatViewS = glGetUniformLocation(programId1, "View");
+	loctime = glGetUniformLocation(programId1, "time");
 
 	MatModelR = glGetUniformLocation(programIdr, "Model");
 	MatViewR = glGetUniformLocation(programIdr, "View");
