@@ -41,7 +41,7 @@ static vector<MeshObj> Model3D;
 string stringa_asse;
 float cameraSpeed = 0.1;
 
-float skyRotationSpeed = 0.003f;
+float skyRotationSpeed = 0.002f;
 float skyRotation = 0;
 
 // variabili per la comunicazione delle variabili uniformi con gli shader
@@ -91,6 +91,7 @@ mat4 Projection, Model, View;
 point_light light;
 vector<Material> materials;
 vector<Shader> shaders;
+vec4 playerPos;
 
 LightShaderUniform light_unif = {};
 
@@ -334,11 +335,11 @@ void INIT_VAO(void)
 	Scena.push_back(Toro);
 }
 
-	crea_piano_suddiviso(&Pannello, vec4(0.0, 0.0, 0.0, 1.0), 200, 100);
+	crea_piano_suddiviso(&Pannello, vec4(0.0, 0.0, 0.0, 1.0), 220, 100);
 	crea_VAO_Vector(&Pannello);
 	Pannello.nome = "Pannello";
 	Pannello.ModelM = mat4(1.0);
-	Pannello.ModelM = translate(Pannello.ModelM, vec3(-7.0, -100.0, -2.0));
+	Pannello.ModelM = translate(Pannello.ModelM, vec3(-7.0, -80.0, -2.0));
 	Pannello.ModelM = scale(Pannello.ModelM, vec3(10000, 1, 10000));
 	//Pannello.ModelM = rotate(Pannello.ModelM, radians(90.0f), vec3(1.0, 0.0, 0.0));
 	Pannello.sceltaVS = 1;
@@ -370,61 +371,22 @@ void INIT_VAO(void)
 
 		Model3D.clear();
 
-		name = "Cartoon_boy.obj";
-		path = Meshdir + name;
-		obj = loadAssImp(path.c_str(), Model3D); // OK ombrellone.obj, divano.obj, low_poly_house,man
-
-		nmeshes = Model3D.size();
-
-		for (int i = 0; i < nmeshes; i++)
-		{
-			crea_VAO_Vector_MeshObj(&Model3D[i]);
-			Model3D[i].ModelM = mat4(1.0);
-			Model3D[i].ModelM = translate(Model3D[i].ModelM, vec3(0.0, 0.5, 7.0));
-			Model3D[i].ModelM = scale(Model3D[i].ModelM, vec3(10.0, 10.0, 10.0));
-			Model3D[i].nome = "Bambino";
-
-			Model3D[i].sceltaVS = 3;
-			Model3D[i].sceltaFS = 6;
-		}
-		// ScenaObj.push_back(Model3D);
-
-		Model3D.clear();
-		name = "raptor_01.obj";
-		path = Meshdir + name;
-		obj = loadAssImp(path.c_str(), Model3D); // OK ombrellone.obj, divano.obj, low_poly_house,man
-
-		nmeshes = Model3D.size();
-
-		for (int i = 0; i < nmeshes; i++)
-		{
-
-			crea_VAO_Vector_MeshObj(&Model3D[i]);
-			Model3D[i].ModelM = mat4(1.0);
-			Model3D[i].ModelM = translate(Model3D[i].ModelM, vec3(-7.0, 0.8, 12.0));
-			Model3D[i].ModelM = scale(Model3D[i].ModelM, vec3(2.5, 2.5, 2.5));
-			Model3D[i].nome = "Raptor";
-
-			Model3D[i].sceltaVS = 1;
-			Model3D[i].sceltaFS = 5; // No texture
-		}
-		// ScenaObj.push_back(Model3D);
-
-		Model3D.clear();
-
 		name = "piper_pa18.obj";
 		path = Meshdir + name;
 		obj = loadAssImp(path.c_str(), Model3D); // OK ombrellone.obj, divano.obj, low_poly_house,man
 
 		nmeshes = Model3D.size();
 
+		playerPos = vec4(0.0);
+		ViewSetup.target = playerPos;
 		for (int i = 0; i < nmeshes; i++)
 		{
-
+			
 			crea_VAO_Vector_MeshObj(&Model3D[i]);
 			Model3D[i].ModelM = mat4(1.0);
-			Model3D[i].ModelM = translate(Model3D[i].ModelM, vec3(light.position.x, light.position.y, light.position.z));
+			Model3D[i].ModelM = translate(Model3D[i].ModelM, vec3(playerPos.x, playerPos.y, playerPos.z));
 			Model3D[i].ModelM = scale(Model3D[i].ModelM, vec3(2.5, 2.5, 2.5));
+			Model3D[i].ModelM = rotate(Model3D[i].ModelM, radians(180.0f), vec3(0, 1, 0));
 			Model3D[i].nome = "Piper";
 
 			Model3D[i].sceltaVS = 1;
@@ -523,8 +485,14 @@ void drawScene(void)
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	timer = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
-	// Disegno Sky box
+	//set up camera following player
+	playerPos.z += 0.001;
+	ViewSetup.target = playerPos;
+	ViewSetup.direction = ViewSetup.target - ViewSetup.position;
+	ViewSetup.position += ViewSetup.direction * 0.001f;
 
+
+	// Disegno Sky box
 	glDepthMask(GL_FALSE);
 	glUseProgram(programId1);
 	glUniform1f(loctime, timer);	
@@ -635,6 +603,10 @@ void drawScene(void)
 			// all'interno del Vertex shader. Uso l'identificatio MatModel
 			ScenaObj[j][k].ancora_world = ScenaObj[j][k].ancora_obj;
 			ScenaObj[j][k].ancora_world = ScenaObj[j][k].ModelM * ScenaObj[j][k].ancora_world;
+			if(ScenaObj[j][k].nome == "Piper"){
+				ScenaObj[j][k].ModelM = translate(ScenaObj[j][k].ModelM, vec3(playerPos.x, playerPos.y, playerPos.z));
+			}
+
 			glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(ScenaObj[j][k].ModelM));
 			glUniform1i(lsceltaVS, ScenaObj[j][k].sceltaVS);
 			glUniform1i(lsceltaFS, ScenaObj[j][k].sceltaFS);

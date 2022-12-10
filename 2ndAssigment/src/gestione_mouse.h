@@ -100,7 +100,7 @@ void mouse(int button, int state, int x, int y)
 		}
 		if (state == GLUT_UP)
 		{
-			moving_trackball = false;
+			//moving_trackball = false;
 		}
 
 		last_mouse_pos_X = x;
@@ -228,6 +228,7 @@ void mouseActiveMotion(int x, int y)
 	// Aggiorniamo direzione e posizione della telecamera
 	ViewSetup.direction = ViewSetup.position - ViewSetup.target;
 	ViewSetup.position = ViewSetup.target + rotation_matrix * ViewSetup.direction;
+	
 
 	// Memorizzo l' ultima posizione del mouse
 

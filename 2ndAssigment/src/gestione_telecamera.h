@@ -8,6 +8,7 @@ extern vec3 asse;
 extern string Operazione;
 extern string stringa_asse;
 extern vector<Mesh> Scena;
+extern vec4 playerPos;
 void modifyModelMatrix(glm::vec3 translation_vector, glm::vec3 rotation_vector, GLfloat angle, GLfloat scale_factor)
 {
 	//ricordare che mat4(1) costruisce una matrice identit� di ordine 4
