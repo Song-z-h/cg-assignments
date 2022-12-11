@@ -364,7 +364,7 @@ void INIT_VAO(void)
 	crea_VAO_Vector(&Pannello);
 	Pannello.nome = "Pannello";
 	Pannello.ModelM = mat4(1.0);
-	Pannello.ModelM = translate(Pannello.ModelM, vec3(-7.0, -80.0, -2.0));
+	//Pannello.ModelM = translate(Pannello.ModelM, vec3(-7.0, 0, -2.0));
 	Pannello.ModelM = scale(Pannello.ModelM, vec3(10000, 1, 10000));
 	// Pannello.ModelM = rotate(Pannello.ModelM, radians(90.0f), vec3(1.0, 0.0, 0.0));
 	Pannello.sceltaVS = 1;
@@ -634,7 +634,9 @@ void drawScene(void)
 
 	for (int i = 0; i < numTrees; i++)
 	{
-		tree.translateMainBody(treePos[i].x * TREE_OFFSET, treePos[i].y, treePos[i].z * TREE_OFFSET);
+		float x = treePos[i].x * TREE_OFFSET;
+		float z = treePos[i].z * TREE_OFFSET;
+		tree.translateMainBody(x , treePos[i].y - TREE_OFFSET, z);
 		tree.translateBodyPart();
 		// animation of eyes only for some timer
 		tree.scaleAll(2, 10, 2);

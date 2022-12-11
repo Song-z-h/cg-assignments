@@ -1,6 +1,7 @@
 #include "Strutture.h"
 #include "Lib.h"
 #include <iostream>
+extern vector<vec3> treePos;
 void crea_cubo(Mesh *mesh)
 {
 
@@ -161,6 +162,13 @@ float getNoise(int x, int z, int seed = 10)
 	return rand() % 2 - 1;
 }
 
+float interpolate(float a, float b, float blend)
+{
+	double theta = blend * 3.14f;
+	float f = (float)(1.0f - cos(theta)) * 0.5f;
+	return a * (1.0f - f) + b * f;
+}
+
 float getSmoothNoise(int x, int z, int seed = 10)
 {
 	float cornes = (getNoise(x - 1, z - 1) + getNoise(x + 1, z - 1) +
@@ -173,6 +181,22 @@ float getSmoothNoise(int x, int z, int seed = 10)
 	return cornes + sides + center;
 }
 
+float getInterpolatedNoise(float x, float z)
+{
+	int intX = (int)x;
+	int intZ = (int)z;
+	float fracX = x - intX;
+	float fracZ = z - intZ;
+
+	float v1 = getSmoothNoise(intX, intZ);
+	float v2 = getSmoothNoise(intX + 1, intZ);
+	float v3 = getSmoothNoise(intX, intZ + 1);
+	float v4 = getSmoothNoise(intX + 1, intZ + 1);
+	float i1 = interpolate(v1, v2, fracX);
+	float i2 = interpolate(v3, v4, fracX);
+	return interpolate(i1, i2, fracZ);
+}
+
 void crea_piano_suddiviso(Mesh *mesh, vec4 color, int height, int N = 100)
 {
 	int i, j;
@@ -182,11 +206,17 @@ void crea_piano_suddiviso(Mesh *mesh, vec4 color, int height, int N = 100)
 		for (j = 0; j < N; j++)
 		{
 
-			float randHeight = getSmoothNoise(i, j, 100) * height;
-			mesh->vertici.push_back(vec3(-0.5 + (float)i / N, randHeight, -0.5 + (float)j / N));
+			float randHeight = getInterpolatedNoise(i / 4, j / 4) * height;
+			float x = -0.5 + (float)i / N;
+			float z = -0.5 + (float)j / N;
+			mesh->vertici.push_back(vec3(x, randHeight, z));
 			mesh->colori.push_back(color);
 			mesh->normali.push_back(vec3(0.0, 1.0, 0.0));
 			mesh->texCoords.push_back(vec2((float)i / N, (float)j / N));
+			
+			/**trees on this land*/
+			treePos.push_back(vec3(x, randHeight, z));
+
 		}
 	}
 
