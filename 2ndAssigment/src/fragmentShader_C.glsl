@@ -34,9 +34,12 @@ void main()
     if(sceltaFS==0 || sceltaFS==1 ||sceltaFS==2 ||sceltaFS==4)
     {
     //Shading interpolativo
-    
+     FragColor=mix(ourColor,texture(id_tex,vec2(frag_coord_st.x,frag_coord_st.y)),1);
+      //FragColor = ourColor;
+    }else if(sceltaFS == 10){
       FragColor=mix(ourColor,texture(id_tex,vec2(frag_coord_st.x,frag_coord_st.y) * 40),0.9);
-      }         
+
+    }         
        else if (sceltaFS==3)
 	 {
      //Shading di Phong per modello di illuminazione di Phong

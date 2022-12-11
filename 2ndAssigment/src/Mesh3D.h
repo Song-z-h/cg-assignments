@@ -26,15 +26,21 @@ public:
         this->drawType = drawType;
     }
 
-    void draw(GLuint &MatModel, GLuint &lsceltaVS, GLuint &lsceltaFS, LightShaderUniform &light_unif, GLuint &loc_texture, GLuint &texture)
+    void draw(GLuint &MatModel, GLuint &lsceltaVS, GLuint &lsceltaFS, LightShaderUniform &light_unif, GLuint &loc_texture, GLuint &textureLeaves, GLuint &textureTree)
     {
         // bodySync();
         for (int i = 0; i < bodyParts.size(); i++)
         {
             glBindVertexArray(bodyParts[i].VAO);
-            
-            glUniform1i(loc_texture, 0);
-			glBindTexture(GL_TEXTURE_2D, texture);
+            if (i == 0)
+            {
+                glBindTexture(GL_TEXTURE_2D, textureTree);
+            }
+            else
+            {
+                glUniform1i(loc_texture, 0);
+                glBindTexture(GL_TEXTURE_2D, textureLeaves);
+            }
             /*draw trees on the map*/
             glUniform1i(lsceltaVS, bodyParts[i].sceltaVS);
             glUniform1i(lsceltaFS, bodyParts[i].sceltaFS);

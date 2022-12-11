@@ -51,7 +51,7 @@ static unsigned int programId, programId_text, programId1, MatrixProj, MatModel,
 static unsigned int lsceltaFS, lsceltaVS, loc_texture, MatViewS, MatrixProjS;
 static unsigned int loc_view_pos, MatModelR, MatViewR, MatrixProjR, loc_view_posR, loc_cubemapR;
 
-unsigned int idTex, texture, texture1, cubemapTexture, programIdr, loctime;
+unsigned int idTex, texture, texture1, cubemapTexture, programIdr, loctime, texture2;
 
 float raggio_sfera = 2.5;
 
@@ -271,7 +271,7 @@ void crea_Tree(Mesh3D *mesh)
 	Mesh Cono, Cilindro, Toro;
 
 	// cono
-	crea_cono(&Cono, vec4(0.0, 1.0, 1.0, 1.0));
+	crea_cono(&Cono, vec4(0.0, 0.0, 0.0, 1.0));
 	crea_VAO_Vector(&Cono);
 	Cono.nome = "Cono";
 	Cono.ModelM = mat4(1.0);
@@ -285,7 +285,7 @@ void crea_Tree(Mesh3D *mesh)
 	// Scena.push_back(Cono);
 
 	// CILIDNRO
-	crea_cilindro(&Cilindro, vec4(1.0, 0.0, 0.0, 1.0));
+	crea_cilindro(&Cilindro, vec4(0.5, 0.0, 0.0, 1.0));
 	crea_VAO_Vector(&Cilindro);
 	Cilindro.nome = "Cilindro";
 	Cilindro.ModelM = mat4(1.0);
@@ -321,12 +321,15 @@ void INIT_VAO(void)
 {
 
 	Mesh Pannello, Sfondo, Sfera, Sky;
-	string name = "muromattoni.jpg";
+	string name = "leaves.png";
 	string path = Imagedir + name;
 	texture = loadTexture(path.c_str(), 0);
 	name = "grass.jpg";
 	path = Imagedir + name;
 	texture1 = loadTexture(path.c_str(), 0);
+	name = "tree.jpg";
+	path = Imagedir + name;
+	texture2 = loadTexture(path.c_str(), 0);
 
 	cubemapTexture = loadCubemap(faces, 0);
 	{
@@ -357,7 +360,7 @@ void INIT_VAO(void)
 	Pannello.ModelM = scale(Pannello.ModelM, vec3(10000, 1, 10000));
 	// Pannello.ModelM = rotate(Pannello.ModelM, radians(90.0f), vec3(1.0, 0.0, 0.0));
 	Pannello.sceltaVS = 1;
-	Pannello.sceltaFS = 1;
+	Pannello.sceltaFS = 10;
 	Pannello.material = MaterialType::EMERALD;
 	Scena.push_back(Pannello);
 
@@ -626,7 +629,7 @@ void drawScene(void)
 	// animation of eyes only for some timer
 	tree.scaleAll(2, 10, 2);
 	tree.rotateAll(180, 1, 0, 0);
-	tree.draw(MatModel, lsceltaVS, lsceltaFS, light_unif, loc_texture, texture);
+	tree.draw(MatModel, lsceltaVS, lsceltaFS, light_unif, loc_texture, texture, texture2);
 
 	glutSwapBuffers();
 }
