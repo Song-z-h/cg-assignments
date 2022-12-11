@@ -8,7 +8,7 @@ extern vec3 asse;
 extern string Operazione;
 extern string stringa_asse;
 extern vector<Mesh> Scena;
-extern vec4 playerPos;
+
 void modifyModelMatrix(glm::vec3 translation_vector, glm::vec3 rotation_vector, GLfloat angle, GLfloat scale_factor)
 {
 	//ricordare che mat4(1) costruisce una matrice identit� di ordine 4
@@ -27,8 +27,6 @@ void moveCameraForward()
 {
 	ViewSetup.direction = ViewSetup.target - ViewSetup.position;
 	ViewSetup.position += ViewSetup.direction * cameraSpeed;
-	cout << ViewSetup.target.x << " " << ViewSetup.target.y << " " << ViewSetup.target.z << endl;
-	cout << ViewSetup.position.x << " " << ViewSetup.position.y << " " << ViewSetup.position.z << endl;
 }
 
 void moveCameraBack()

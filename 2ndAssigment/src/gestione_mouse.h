@@ -11,6 +11,7 @@ extern bool firstMouse;
 extern mat4 View, Projection;
 extern float Theta;
 extern float Phi;
+extern vec4 playerPos;
 
 vec3 get_ray_from_mouse(float mouse_x, float mouse_y)
 {
@@ -158,7 +159,6 @@ void mouse(int button, int state, int x, int y)
 			{
 				printf("Oggetto selezionato %d -> %s \n", selected_meshobj, ScenaObj[selected_meshobj][0].nome.c_str());
 			}
-			
 		}
 		break;
 	default:
@@ -206,7 +206,7 @@ void mouseActiveMotion(int x, int y)
 
 	// Calcoliamo il coseno dell'angolo tra il segmento che collega l'origine e il click corrente e il segmento
 	// che collega l'origine ed il click corrente
-	float cosangolo = dot(precedente, corrente);
+	int cosangolo = dot(precedente, corrente);
 
 	// Il prodotto scalare tra due vettori normalizzati che hanno lunghezza 1,
 	//  pu� variare tra -1 ed 1.
@@ -226,9 +226,12 @@ void mouseActiveMotion(int x, int y)
 	// Trasformiamo il quaternione in matrice di rotazione
 	mat4 rotation_matrix = toMat4(rotation);
 	// Aggiorniamo direzione e posizione della telecamera
-	ViewSetup.direction = ViewSetup.position - ViewSetup.target;
-	ViewSetup.position = ViewSetup.target + rotation_matrix * ViewSetup.direction;
-	
+	ViewSetup.direction = rotation_matrix * ViewSetup.direction;
+	ViewSetup.target = playerPos;
+	// ViewSetup.upVector = rotation_matrix * ViewSetup.upVector;
+	ViewSetup.position = ViewSetup.target - normalize(ViewSetup.direction) * 70.0f;
+//	cout << ViewSetup.position.x << " " << ViewSetup.position.y << " " << ViewSetup.position.z << endl;
+	cout << ViewSetup.target.x << " " << ViewSetup.target.y << " " << ViewSetup.target.z << endl;
 
 	// Memorizzo l' ultima posizione del mouse
 

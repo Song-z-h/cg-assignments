@@ -41,7 +41,11 @@ int h_up = height;
 static vector<MeshObj> Model3D;
 string stringa_asse;
 float cameraSpeed = 0.1;
+
 Mesh3D tree(GL_TRIANGLES);
+vector<vec3> treePos;
+const int numTrees = 100;
+const int TREE_OFFSET = 50;
 
 float skyRotationSpeed = 0.001f;
 float skyRotation = 0;
@@ -277,7 +281,7 @@ void crea_Tree(Mesh3D *mesh)
 	Cono.ModelM = mat4(1.0);
 	// Cono.ModelM = translate(Cono.ModelM, vec3(-12.5, 5.2, 12.0));
 	Cono.ModelM = scale(Cono.ModelM, vec3(1.2f, 1.5f, 1.2f));
-	//Cono.ModelM = rotate(Cono.ModelM, radians(180.0f), vec3(1.0, 0.0, 0.0));
+	// Cono.ModelM = rotate(Cono.ModelM, radians(180.0f), vec3(1.0, 0.0, 0.0));
 	Cono.sceltaVS = 1;
 	Cono.sceltaFS = 1;
 	Cono.material = MaterialType::RED_PLASTIC;
@@ -309,7 +313,7 @@ void crea_Tree(Mesh3D *mesh)
 	Toro.material = MaterialType::BRASS;
 	Toro.ancora_obj = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	// Scena.push_back(Toro);
-	//tree.addBodypart(Cilindro, 0, 0, 0, 0.001);
+	// tree.addBodypart(Cilindro, 0, 0, 0, 0.001);
 	tree.addBodypart(Cilindro, 0, 0, 0, 1, 1, 1);
 	tree.addBodypart(Cono, 0, 1, 0, 5, 1, 5);
 	tree.addBodypart(Cono, 0, 1.5, 0, 4, 1, 4);
@@ -351,6 +355,10 @@ void INIT_VAO(void)
 	}
 
 	crea_Tree(&tree);
+	for (int i = 0; i < numTrees; i++)
+	{
+		treePos.push_back(vec3(rand() % 30 - 15, 0, rand() % 30 - 15));
+	}
 
 	crea_piano_suddiviso(&Pannello, vec4(0.0, 0.0, 0.0, 1.0), 220, 100);
 	crea_VAO_Vector(&Pannello);
@@ -478,16 +486,17 @@ void resize(int w, int h)
 void drawScene(void)
 {
 	glUniformMatrix4fv(MatrixProj, 1, GL_FALSE, value_ptr(Projection));
-	View = lookAt(vec3(ViewSetup.position), vec3(ViewSetup.target), vec3(ViewSetup.upVector));
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	timer = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
 	// set up camera following player
 	playerPos.z += 0.001;
 	// ViewSetup.target = playerPos;
-	// ViewSetup.direction = ViewSetup.target - ViewSetup.position;
-	// ViewSetup.position += ViewSetup.direction * 0.001f;
-	//	cout << ViewSetup.target.x << " " << ViewSetup.target.y << " " << ViewSetup.target.z << endl;
+	View = lookAt(vec3(ViewSetup.position), vec3(ViewSetup.target), vec3(ViewSetup.upVector));
+	// View = translate(View, vec3(playerPos.x, playerPos.y, playerPos.z));
+	//  ViewSetup.direction = ViewSetup.target - ViewSetup.position;
+	//  ViewSetup.position += ViewSetup.direction * 0.001f;
+	// cout << ViewSetup.target.x << " " << ViewSetup.target.y << " " << ViewSetup.target.z << endl;
 
 	// Disegno Sky box
 	glDepthMask(GL_FALSE);
@@ -623,13 +632,15 @@ void drawScene(void)
 		}
 	}
 
-	
-	tree.translateMainBody(0, 0, 0.0f);
-	tree.translateBodyPart();
-	// animation of eyes only for some timer
-	tree.scaleAll(2, 10, 2);
-	tree.rotateAll(180, 1, 0, 0);
-	tree.draw(MatModel, lsceltaVS, lsceltaFS, light_unif, loc_texture, texture, texture2);
+	for (int i = 0; i < numTrees; i++)
+	{
+		tree.translateMainBody(treePos[i].x * TREE_OFFSET, treePos[i].y, treePos[i].z * TREE_OFFSET);
+		tree.translateBodyPart();
+		// animation of eyes only for some timer
+		tree.scaleAll(2, 10, 2);
+		tree.rotateAll(180, 1, 0, 0);
+		tree.draw(MatModel, lsceltaVS, lsceltaFS, light_unif, loc_texture, texture, texture2);
+	}
 
 	glutSwapBuffers();
 }
