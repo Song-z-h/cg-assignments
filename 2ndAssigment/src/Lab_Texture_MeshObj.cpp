@@ -327,7 +327,7 @@ void INIT_VAO(void)
 	name = "grass.jpg";
 	path = Imagedir + name;
 	texture1 = loadTexture(path.c_str(), 0);
-	name = "tree.jpg";
+	name = "tree.png";
 	path = Imagedir + name;
 	texture2 = loadTexture(path.c_str(), 0);
 
