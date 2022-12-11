@@ -27,7 +27,8 @@ void moveCameraForward()
 {
 	ViewSetup.direction = ViewSetup.target - ViewSetup.position;
 	ViewSetup.position += ViewSetup.direction * cameraSpeed;
-
+	cout << ViewSetup.target.x << " " << ViewSetup.target.y << " " << ViewSetup.target.z << endl;
+	cout << ViewSetup.position.x << " " << ViewSetup.position.y << " " << ViewSetup.position.z << endl;
 }
 
 void moveCameraBack()

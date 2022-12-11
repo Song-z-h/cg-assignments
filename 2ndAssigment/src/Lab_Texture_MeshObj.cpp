@@ -490,6 +490,8 @@ void drawScene(void)
 	ViewSetup.target = playerPos;
 	ViewSetup.direction = ViewSetup.target - ViewSetup.position;
 	ViewSetup.position += ViewSetup.direction * 0.001f;
+		cout << ViewSetup.target.x << " " << ViewSetup.target.y << " " << ViewSetup.target.z << endl;
+
 
 
 	// Disegno Sky box

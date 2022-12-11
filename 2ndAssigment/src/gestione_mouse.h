@@ -100,7 +100,7 @@ void mouse(int button, int state, int x, int y)
 		}
 		if (state == GLUT_UP)
 		{
-			//moving_trackball = false;
+			moving_trackball = false;
 		}
 
 		last_mouse_pos_X = x;

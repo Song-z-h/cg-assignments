@@ -1,69 +1,26 @@
 #ifndef _MESH_H_
 #define _MESH_H_
 #include "Lib.h"
+#include "Strutture.h"
 
-typedef struct
-{
-    GLuint VAO;
-    GLuint VBO_G;
-    GLuint VBO_C;
-    int nTriangles;
-    // Vertici
-    vector<vec3> vertici;
-    vector<vec4> colors;
-    // Numero vertici
-    int nv;
-    // Matrice di Modellazione: Traslazione*Rotazione*Scala
-    mat4 Model;
-} Figura;
-
-class Shape
-{
-public:
-    vec3 anchorPos;
-    Figura figura;
-    Shape(Figura figura, float x, float y, float z = 0)
-    {
-        this->figura = figura;
-        this->setAnchorPosition(x, y, z);
-    }
-
-    void setAnchorPosition(float x, float y, float z = 0)
-    {
-        anchorPos = vec3(x, y, z);
-    }
-    void setPositionToAnchor(float x, float y, float z = 0)
-    {
-        anchorPos.x += x;
-        anchorPos.y += y;
-        anchorPos.z += z;
-    }
-    void setScaleToAnchor(float scale)
-    {
-    }
-    void setRotationToAnchor()
-    {
-    }
-};
-
-class Mesh
+class Mesh3D
 {
 private:
     vector<vec3> offsets;
     vector<vec3> scales;
     bool consumed = false;
     GLint drawType;
-    vector<Figura> bodyParts;
+    vector<Mesh> bodyParts;
 
 public:
     mat4 getBodyPartsModel(int i)
     {
         if (i < 0 || i >= bodyParts.size())
             return mat4(1.0f);
-        return bodyParts[i].Model;
+        return bodyParts[i].ModelM;
     }
 
-    Mesh(GLint drawType)
+    Mesh3D(GLint drawType)
     {
         this->drawType = drawType;
     }
@@ -74,7 +31,7 @@ public:
         for (int i = 0; i < bodyParts.size(); i++)
         {
             glBindVertexArray(bodyParts[i].VAO);
-            glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(bodyParts[i].Model));
+            glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(bodyParts[i].ModelM));
             glDrawArrays(drawType, 0, bodyParts[i].vertici.size());
             glBindVertexArray(0);
         }
@@ -89,7 +46,7 @@ public:
         }
         return vertices;
     }
-    void addBodypart(Figura &body, float offsetX = 0, float offsetY = 0, float offsetZ = 0.0,
+    void addBodypart(Mesh &body, float offsetX = 0, float offsetY = 0, float offsetZ = 0.0,
                      float scale = 1)
     {
         bodyParts.push_back(body);
@@ -100,7 +57,7 @@ public:
     {
         for (int i = 0; i < bodyParts.size(); i++)
         {
-            bodyParts[i].Model = mat4(1.0f);
+            bodyParts[i].ModelM = mat4(1.0f);
         }
     }
 
@@ -109,7 +66,7 @@ public:
         resetModelMat();
         for (int i = 0; i < bodyParts.size(); i++)
         {
-            bodyParts[i].Model = translate(bodyParts[i].Model, vec3(x, y, z));
+            bodyParts[i].ModelM = translate(bodyParts[i].ModelM, vec3(x, y, z));
         }
     }
 
@@ -117,7 +74,7 @@ public:
     {
         for (int i = 1; i < bodyParts.size(); i++)
         {
-            bodyParts[i].Model = translate(bodyParts[i].Model, offsets[i]);
+            bodyParts[i].ModelM = translate(bodyParts[i].ModelM, offsets[i]);
         }
     }
 
@@ -125,7 +82,7 @@ public:
     {
         for (int i = 0; i < bodyParts.size(); i++)
         {
-            bodyParts[i].Model = rotate(bodyParts[i].Model, radians(theta), vec3(x, y, z));
+            bodyParts[i].ModelM = rotate(bodyParts[i].ModelM, radians(theta), vec3(x, y, z));
         }
     }
     void scaleAll(float x, float y, float z = 1.0f)
@@ -133,7 +90,7 @@ public:
         for (int i = 0; i < bodyParts.size(); i++)
         {
             scaleOne(i, scales[i].x, scales[i].y, scales[i].z);
-            bodyParts[i].Model = scale(bodyParts[i].Model, vec3(x, y, z));
+            bodyParts[i].ModelM = scale(bodyParts[i].ModelM, vec3(x, y, z));
             if (!consumed)
             {
                 offsets[i].x *= x;
@@ -148,7 +105,7 @@ public:
     {
         if (i < 0 || i >= bodyParts.size())
             return;
-        bodyParts[i].Model = scale(bodyParts[i].Model, vec3(x, y, z));
+        bodyParts[i].ModelM = scale(bodyParts[i].ModelM, vec3(x, y, z));
         if (!consumed)
         {
             offsets[i].x *= x;
@@ -161,7 +118,7 @@ public:
     {
         if (i < 0 || i >= bodyParts.size())
             return;
-        bodyParts[i].Model = scale(bodyParts[i].Model, vec3(x, y, z));
+        bodyParts[i].ModelM = scale(bodyParts[i].ModelM, vec3(x, y, z));
     }
 };
 
