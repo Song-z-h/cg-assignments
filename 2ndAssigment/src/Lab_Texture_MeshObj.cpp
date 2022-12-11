@@ -11,6 +11,7 @@
 #include "gestione_telecamera.h"
 #include "Strutture.h"
 #include "enum.h"
+#include "Mesh3D.h"
 
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
@@ -40,8 +41,9 @@ int h_up = height;
 static vector<MeshObj> Model3D;
 string stringa_asse;
 float cameraSpeed = 0.1;
+Mesh3D tree(GL_TRIANGLES);
 
-float skyRotationSpeed = 0.002f;
+float skyRotationSpeed = 0.001f;
 float skyRotation = 0;
 
 // variabili per la comunicazione delle variabili uniformi con gli shader
@@ -68,13 +70,12 @@ vector<std::string> faces{
 		"bottom.jpg",
 		"front.jpg",
 		"back.jpg"*/
-		SkyboxDir + "right.png",
-		SkyboxDir + "left.png",
-		SkyboxDir + "top.jpg",
-		SkyboxDir + "bottom.png",
-		SkyboxDir + "back.png",
-		SkyboxDir + "front.png"
-	};
+	SkyboxDir + "right.png",
+	SkyboxDir + "left.png",
+	SkyboxDir + "top.jpg",
+	SkyboxDir + "bottom.png",
+	SkyboxDir + "back.png",
+	SkyboxDir + "front.png"};
 
 // loads a cubemap texture from 6 individual texture faces
 // order:
@@ -265,10 +266,61 @@ void crea_VAO_Vector(Mesh *mesh)
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->indici.size() * sizeof(GLuint), mesh->indici.data(), GL_STATIC_DRAW);
 }
 
+void crea_Tree(Mesh3D *mesh)
+{
+	Mesh Cono, Cilindro, Toro;
+
+	// cono
+	crea_cono(&Cono, vec4(0.0, 1.0, 1.0, 1.0));
+	crea_VAO_Vector(&Cono);
+	Cono.nome = "Cono";
+	Cono.ModelM = mat4(1.0);
+	// Cono.ModelM = translate(Cono.ModelM, vec3(-12.5, 5.2, 12.0));
+	Cono.ModelM = scale(Cono.ModelM, vec3(1.2f, 1.5f, 1.2f));
+	//Cono.ModelM = rotate(Cono.ModelM, radians(180.0f), vec3(1.0, 0.0, 0.0));
+	Cono.sceltaVS = 1;
+	Cono.sceltaFS = 1;
+	Cono.material = MaterialType::RED_PLASTIC;
+	Cono.ancora_obj = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	// Scena.push_back(Cono);
+
+	// CILIDNRO
+	crea_cilindro(&Cilindro, vec4(1.0, 0.0, 0.0, 1.0));
+	crea_VAO_Vector(&Cilindro);
+	Cilindro.nome = "Cilindro";
+	Cilindro.ModelM = mat4(1.0);
+	// Cilindro.ModelM = translate(Cilindro.ModelM, vec3(7.0, -4.0, 7.0));
+	Cilindro.ModelM = scale(Cilindro.ModelM, vec3(1.0, 1.5, 1.0));
+	Cilindro.sceltaVS = 1;
+	Cilindro.sceltaFS = 1;
+	Cilindro.material = MaterialType::MARRONE;
+	Cilindro.ancora_obj = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	// Scena.push_back(Cilindro);
+
+	// TORO
+	crea_toro(&Toro, vec4(0.0, 1.0, 0.0, 1.0));
+	crea_VAO_Vector(&Toro);
+	Toro.nome = "Toro";
+	Toro.ModelM = mat4(1.0);
+	// Toro.ModelM = translate(Toro.ModelM, vec3(7.0, -1.0, 7.0));
+	Toro.ModelM = scale(Toro.ModelM, vec3(1.0, 0.5, 1.0));
+	Toro.sceltaVS = 1;
+	Toro.sceltaFS = 1;
+	Toro.material = MaterialType::BRASS;
+	Toro.ancora_obj = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	// Scena.push_back(Toro);
+	//tree.addBodypart(Cilindro, 0, 0, 0, 0.001);
+	tree.addBodypart(Cilindro, 0, 0, 0, 1, 1, 1);
+	tree.addBodypart(Cono, 0, 1, 0, 5, 1, 5);
+	tree.addBodypart(Cono, 0, 1.5, 0, 4, 1, 4);
+	tree.addBodypart(Cono, 0, 2, 0, 3, 1, 3);
+	tree.addBodypart(Cono, 0, 2.5, 0, 2, 1, 2);
+}
+
 void INIT_VAO(void)
 {
 
-	Mesh Pannello, Sfondo, Sfera, Cono, Cilindro, Toro, Sky;
+	Mesh Pannello, Sfondo, Sfera, Sky;
 	string name = "muromattoni.jpg";
 	string path = Imagedir + name;
 	texture = loadTexture(path.c_str(), 0);
@@ -277,63 +329,25 @@ void INIT_VAO(void)
 	texture1 = loadTexture(path.c_str(), 0);
 
 	cubemapTexture = loadCubemap(faces, 0);
-	// Sky
-	crea_cubo(&Sky);
-	crea_VAO_Vector(&Sky);
-	Scena.push_back(Sky);
-{
-	// Sfera
-	crea_sfera(&Sfera, vec4(1.0, 0.0, 0.0, 1.0));
-	crea_VAO_Vector(&Sfera);
-	Sfera.ModelM = mat4(1.0);
-	Sfera.ModelM = translate(Sfera.ModelM, vec3(5.5, 2.8, 12.0));
-	Sfera.ModelM = scale(Sfera.ModelM, vec3(1.0f, 1.0f, 1.0f));
-	Sfera.sceltaVS = 1;
-	Sfera.sceltaFS = 1;
-	Sfera.nome = "Sfera";
-	Sfera.material = MaterialType::EMERALD;
-	Scena.push_back(Sfera);
+	{
+		// Sky
+		crea_cubo(&Sky);
+		crea_VAO_Vector(&Sky);
+		Scena.push_back(Sky);
+		// Sfera
+		crea_sfera(&Sfera, vec4(1.0, 0.0, 0.0, 1.0));
+		crea_VAO_Vector(&Sfera);
+		Sfera.ModelM = mat4(1.0);
+		Sfera.ModelM = translate(Sfera.ModelM, vec3(5.5, 2.8, 12.0));
+		Sfera.ModelM = scale(Sfera.ModelM, vec3(1.0f, 1.0f, 1.0f));
+		Sfera.sceltaVS = 1;
+		Sfera.sceltaFS = 1;
+		Sfera.nome = "Sfera";
+		Sfera.material = MaterialType::EMERALD;
+		Scena.push_back(Sfera);
+	}
 
-	// cono
-	crea_cono(&Cono, vec4(1.0, 0.0, 0.0, 1.0));
-	crea_VAO_Vector(&Cono);
-	Cono.nome = "Cono";
-	Cono.ModelM = mat4(1.0);
-	Cono.ModelM = translate(Cono.ModelM, vec3(-12.5, 5.2, 12.0));
-	Cono.ModelM = scale(Cono.ModelM, vec3(1.2f, 1.5f, 1.2f));
-	Cono.ModelM = rotate(Cono.ModelM, radians(180.0f), vec3(1.0, 0.0, 0.0));
-	Cono.sceltaVS = 1;
-	Cono.sceltaFS = 1;
-	Cono.material = MaterialType::RED_PLASTIC;
-	Cono.ancora_obj = vec4(0.0f, 0.0f, 0.0f, 1.0f);
-	Scena.push_back(Cono);
-
-	// CILIDNRO
-	crea_cilindro(&Cilindro, vec4(1.0, 0.0, 0.0, 1.0));
-	crea_VAO_Vector(&Cilindro);
-	Cilindro.nome = "Cilindro";
-	Cilindro.ModelM = mat4(1.0);
-	Cilindro.ModelM = translate(Cilindro.ModelM, vec3(7.0, -4.0, 7.0));
-	Cilindro.ModelM = scale(Cilindro.ModelM, vec3(1.0, 4.5, 1.0));
-	Cilindro.sceltaVS = 1;
-	Cilindro.sceltaFS = 1;
-	Cilindro.material = MaterialType::MARRONE;
-	Cilindro.ancora_obj = vec4(0.0f, 0.0f, 0.0f, 1.0f);
-	Scena.push_back(Cilindro);
-
-	// TORO
-	crea_toro(&Toro, vec4(0.0, 1.0, 0.0, 1.0));
-	crea_VAO_Vector(&Toro);
-	Toro.nome = "Toro";
-	Toro.ModelM = mat4(1.0);
-	Toro.ModelM = translate(Toro.ModelM, vec3(7.0, -1.0, 7.0));
-	Toro.ModelM = scale(Toro.ModelM, vec3(1.0, 0.5, 1.0));
-	Toro.sceltaVS = 1;
-	Toro.sceltaFS = 1;
-	Toro.material = MaterialType::BRASS;
-	Toro.ancora_obj = vec4(0.0f, 0.0f, 0.0f, 1.0f);
-	Scena.push_back(Toro);
-}
+	crea_Tree(&tree);
 
 	crea_piano_suddiviso(&Pannello, vec4(0.0, 0.0, 0.0, 1.0), 220, 100);
 	crea_VAO_Vector(&Pannello);
@@ -341,7 +355,7 @@ void INIT_VAO(void)
 	Pannello.ModelM = mat4(1.0);
 	Pannello.ModelM = translate(Pannello.ModelM, vec3(-7.0, -80.0, -2.0));
 	Pannello.ModelM = scale(Pannello.ModelM, vec3(10000, 1, 10000));
-	//Pannello.ModelM = rotate(Pannello.ModelM, radians(90.0f), vec3(1.0, 0.0, 0.0));
+	// Pannello.ModelM = rotate(Pannello.ModelM, radians(90.0f), vec3(1.0, 0.0, 0.0));
 	Pannello.sceltaVS = 1;
 	Pannello.sceltaFS = 1;
 	Pannello.material = MaterialType::EMERALD;
@@ -349,27 +363,7 @@ void INIT_VAO(void)
 
 	bool obj;
 	{
-		name = "legend.obj";
-		path = Meshdir + name;
-		obj = loadAssImp(path.c_str(), Model3D); // OK ombrellone.obj, divano.obj, low_poly_house,man
-
-		int nmeshes = Model3D.size();
-
-		for (int i = 0; i < nmeshes; i++)
-		{
-			crea_VAO_Vector_MeshObj(&Model3D[i]);
-			Model3D[i].ModelM = mat4(1.0);
-			Model3D[i].ModelM = translate(Model3D[i].ModelM, vec3(-6.0, -4.0, 12.0));
-			Model3D[i].ModelM = scale(Model3D[i].ModelM, vec3(4.0, 4.0, 4.0));
-			Model3D[i].nome = "Automobili";
-			Model3D[i].sceltaVS = 1;
-			Model3D[i].sceltaFS = 5;
-			Model3D[i].ancora_obj = vec4(0.0f, 0.0f, 0.0f, 1.0f);
-		}
-
-//		 ScenaObj.push_back(Model3D);
-
-		Model3D.clear();
+		int nmeshes = 0;
 
 		name = "piper_pa18.obj";
 		path = Meshdir + name;
@@ -381,7 +375,7 @@ void INIT_VAO(void)
 		ViewSetup.target = playerPos;
 		for (int i = 0; i < nmeshes; i++)
 		{
-			
+
 			crea_VAO_Vector_MeshObj(&Model3D[i]);
 			Model3D[i].ModelM = mat4(1.0);
 			Model3D[i].ModelM = translate(Model3D[i].ModelM, vec3(playerPos.x, playerPos.y, playerPos.z));
@@ -485,19 +479,17 @@ void drawScene(void)
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	timer = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
-	//set up camera following player
+	// set up camera following player
 	playerPos.z += 0.001;
-	ViewSetup.target = playerPos;
-	ViewSetup.direction = ViewSetup.target - ViewSetup.position;
-	ViewSetup.position += ViewSetup.direction * 0.001f;
-		cout << ViewSetup.target.x << " " << ViewSetup.target.y << " " << ViewSetup.target.z << endl;
-
-
+	// ViewSetup.target = playerPos;
+	// ViewSetup.direction = ViewSetup.target - ViewSetup.position;
+	// ViewSetup.position += ViewSetup.direction * 0.001f;
+	//	cout << ViewSetup.target.x << " " << ViewSetup.target.y << " " << ViewSetup.target.z << endl;
 
 	// Disegno Sky box
 	glDepthMask(GL_FALSE);
 	glUseProgram(programId1);
-	glUniform1f(loctime, timer);	
+	glUniform1f(loctime, timer);
 	glUniform1i(glGetUniformLocation(programId1, "skybox"), 0);
 	glUniformMatrix4fv(MatrixProjS, 1, GL_FALSE, value_ptr(Projection));
 	skyRotation += skyRotationSpeed * timer;
@@ -543,10 +535,10 @@ void drawScene(void)
 	glUniform3f(loc_view_pos, ViewSetup.position.x, ViewSetup.position.y, ViewSetup.position.z);
 
 	for (int k = 2; k < Scena.size(); k++)
-	{	
+	{
 		Scena[k].ancora_world = Scena[k].ancora_obj;
 		Scena[k].ancora_world = Scena[k].ModelM * Scena[k].ancora_world;
-		
+
 		// Trasformazione delle coordinate dell'ancora dal sistema di riferimento dell'oggetto in sistema
 		// di riferimento del mondo premoltiplicando per la matrice di Modellazione.
 		// cout << Scena[k].ancora_world.r << " " << Scena[k].ancora_world.b << " " << Scena[k].ancora_world.g << endl;
@@ -605,7 +597,8 @@ void drawScene(void)
 			// all'interno del Vertex shader. Uso l'identificatio MatModel
 			ScenaObj[j][k].ancora_world = ScenaObj[j][k].ancora_obj;
 			ScenaObj[j][k].ancora_world = ScenaObj[j][k].ModelM * ScenaObj[j][k].ancora_world;
-			if(ScenaObj[j][k].nome == "Piper"){
+			if (ScenaObj[j][k].nome == "Piper")
+			{
 				ScenaObj[j][k].ModelM = translate(ScenaObj[j][k].ModelM, vec3(playerPos.x, playerPos.y, playerPos.z));
 			}
 
@@ -626,6 +619,14 @@ void drawScene(void)
 			glBindVertexArray(0);
 		}
 	}
+
+	
+	tree.translateMainBody(0, 0, 0.0f);
+	tree.translateBodyPart();
+	// animation of eyes only for some timer
+	tree.scaleAll(2, 10, 2);
+	tree.rotateAll(180, 1, 0, 0);
+	tree.draw(MatModel, lsceltaVS, lsceltaFS, light_unif, loc_texture, texture);
 
 	glutSwapBuffers();
 }
