@@ -354,6 +354,7 @@ void INIT_VAO(void)
 		Sfera.sceltaFS = 1;
 		Sfera.nome = "Sfera";
 		Sfera.material = MaterialType::EMERALD;
+		Sfera.ancora_obj = vec4(0, 0, 0, 1);
 		Scena.push_back(Sfera);
 	}
 
@@ -396,7 +397,7 @@ void INIT_VAO(void)
 			// Model3D[i].ModelM = scale(Model3D[i].ModelM, vec3(2.5, 2.5, 2.5));
 			// Model3D[i].ModelM = rotate(Model3D[i].ModelM, radians(180.0f), vec3(0, 1, 0));
 			Model3D[i].nome = "Piper";
-
+            Model3D[i].ancora_obj = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 			Model3D[i].sceltaVS = 1;
 			Model3D[i].sceltaFS = 5;
 		}
@@ -417,6 +418,7 @@ void INIT_VAO(void)
 			Model3D[i].ModelM = mat4(1.0);
 			Model3D[i].ModelM = translate(Model3D[i].ModelM, vec3(-16.0, 6.0, 3.0));
 			Model3D[i].ModelM = scale(Model3D[i].ModelM, vec3(2.5, 2.5, 2.5));
+			Model3D[i].ModelM = rotate(Model3D[i].ModelM, radians(180.0f), vec3(0, 1, 0));
 			Model3D[i].nome = "Shine";
 			Model3D[i].ancora_obj = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 			Model3D[i].sceltaVS = 1;
@@ -531,6 +533,8 @@ void drawScene(void)
 	glUniformMatrix4fv(MatViewR, 1, GL_FALSE, value_ptr(View));
 	glUniform3f(loc_view_posR, ViewSetup.position.x, ViewSetup.position.y, ViewSetup.position.z);
 	glBindVertexArray(Scena[1].VAO);
+	Scena[1].ancora_world = Scena[1].ancora_obj;
+	Scena[1].ancora_world = Scena[1].ModelM * Scena[1].ancora_world;
 	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
 	glDrawElements(GL_TRIANGLES, (Scena[1].indici.size() - 1) * sizeof(GLuint), GL_UNSIGNED_INT, 0);
 	// Cambio program per renderizzare tutto il resto della scena
@@ -651,7 +655,7 @@ void drawScene(void)
 	}
 	else
 	{
-		ViewSetup.position = vec4(vec3(0, 0, -30), 0);
+		ViewSetup.position = vec4(0, 0, -30, 0);
 	}
 
 	for (int i = 0; i < numTrees; i++)
