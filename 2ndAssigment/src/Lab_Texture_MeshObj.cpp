@@ -41,6 +41,7 @@ int h_up = height;
 static vector<MeshObj> Model3D;
 string stringa_asse;
 float cameraSpeed = 0.1;
+bool moveCamera = false;
 
 Mesh3D tree(GL_TRIANGLES);
 vector<vec3> treePos;
@@ -438,6 +439,9 @@ void keyboardReleasedEvent(unsigned char key, int x, int y)
 		case 'v':
 			visualizzaAncora = false;
 			break;
+		case 'b':
+			moveCamera = !moveCamera;
+			break;
 		default:
 			break;
 		}
@@ -611,8 +615,9 @@ void drawScene(void)
 				ScenaObj[j][k].ModelM = translate(ScenaObj[j][k].ModelM, playerMov);
 				if (playerRotationQuat.w > 0)
 				{
-					ScenaObj[j][k].ModelM =  ScenaObj[j][k].ModelM *  toMat4(playerRotationQuat);					if(k == ScenaObj[j].size() - 1)
-					playerRotationQuat.w = -1;
+					ScenaObj[j][k].ModelM = ScenaObj[j][k].ModelM * toMat4(playerRotationQuat);
+					if (k == ScenaObj[j].size() - 1)
+						playerRotationQuat.w = -1;
 				}
 			}
 			ScenaObj[j][k].ancora_world = ScenaObj[j][k].ancora_obj;
@@ -636,12 +641,18 @@ void drawScene(void)
 		}
 	}
 
-	// ViewSetup.target = ScenaObj[0][0].ancora_world;
 	ViewSetup.target += vec4(playerMov, 0);
-	// ViewSetup.position = ScenaObj[0][0].ModelM * ViewSetup.position;
+	/**I need to define the airplane's motion with a direction, so i can apply the same rotation to the camera.*/
 	ViewSetup.direction = ViewSetup.target - ViewSetup.position;
-	ViewSetup.position = ViewSetup.target - normalize(ViewSetup.direction) * 40.0f;
-	//ViewSetup.position = vec4(playerMov, 0);
+	vec3 tempPos = ViewSetup.target;
+	if (moveCamera)
+	{
+		ViewSetup.position = ViewSetup.target - normalize(ViewSetup.direction) * 40.0f;
+	}
+	else
+	{
+		ViewSetup.position = vec4(vec3(0, 0, -30), 0);
+	}
 
 	for (int i = 0; i < numTrees; i++)
 	{
