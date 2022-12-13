@@ -96,7 +96,9 @@ mat4 Projection, Model, View;
 point_light light;
 vector<Material> materials;
 vector<Shader> shaders;
-vec4 playerPos;
+
+vec3 playerMov = vec3(0, 0, 0);
+quat playerRotationQuat = quat(0, vec3(0, 0, 0));
 
 LightShaderUniform light_unif = {};
 
@@ -364,7 +366,7 @@ void INIT_VAO(void)
 	crea_VAO_Vector(&Pannello);
 	Pannello.nome = "Pannello";
 	Pannello.ModelM = mat4(1.0);
-	//Pannello.ModelM = translate(Pannello.ModelM, vec3(-7.0, 0, -2.0));
+	// Pannello.ModelM = translate(Pannello.ModelM, vec3(-7.0, 0, -2.0));
 	Pannello.ModelM = scale(Pannello.ModelM, vec3(10000, 1, 10000));
 	// Pannello.ModelM = rotate(Pannello.ModelM, radians(90.0f), vec3(1.0, 0.0, 0.0));
 	Pannello.sceltaVS = 1;
@@ -382,16 +384,16 @@ void INIT_VAO(void)
 
 		nmeshes = Model3D.size();
 
-		playerPos = vec4(0.0);
-		ViewSetup.target = playerPos;
+		// playerPos = vec4(0.0);
+		// ViewSetup.target = playerPos;
 		for (int i = 0; i < nmeshes; i++)
 		{
 
 			crea_VAO_Vector_MeshObj(&Model3D[i]);
 			Model3D[i].ModelM = mat4(1.0);
-			Model3D[i].ModelM = translate(Model3D[i].ModelM, vec3(playerPos.x, playerPos.y, playerPos.z));
-			Model3D[i].ModelM = scale(Model3D[i].ModelM, vec3(2.5, 2.5, 2.5));
-			Model3D[i].ModelM = rotate(Model3D[i].ModelM, radians(180.0f), vec3(0, 1, 0));
+			// Model3D[i].ModelM = translate(Model3D[i].ModelM, vec3(playerPos.x, playerPos.y, playerPos.z));
+			// Model3D[i].ModelM = scale(Model3D[i].ModelM, vec3(2.5, 2.5, 2.5));
+			// Model3D[i].ModelM = rotate(Model3D[i].ModelM, radians(180.0f), vec3(0, 1, 0));
 			Model3D[i].nome = "Piper";
 
 			Model3D[i].sceltaVS = 1;
@@ -423,6 +425,9 @@ void INIT_VAO(void)
 
 		Model3D.clear();
 	}
+	// player movement
+	playerMov.z = 1;
+	// playerMov.y = 0.5;
 }
 
 void keyboardReleasedEvent(unsigned char key, int x, int y)
@@ -445,8 +450,8 @@ void INIT_CAMERA_PROJECTION(void)
 	// Imposto la telecamera
 
 	ViewSetup = {};
-	ViewSetup.position = glm::vec4(0.0, 0.5, 70.0, 0.0);
-	ViewSetup.target = glm::vec4(0.0, 0.0, 0.0, 0.0);
+	ViewSetup.position = glm::vec4(0.0, 0.5, -70.0, 1.0);
+	ViewSetup.target = glm::vec4(0.0, 0.0, 0.0, 1.0);
 	ViewSetup.direction = ViewSetup.target - ViewSetup.position;
 	ViewSetup.upVector = glm::vec4(0.0, 1.0, 0.0, 0.0);
 
@@ -454,7 +459,7 @@ void INIT_CAMERA_PROJECTION(void)
 	PerspectiveSetup = {};
 	PerspectiveSetup.aspect = (GLfloat)width / (GLfloat)height;
 	PerspectiveSetup.fovY = 45.0f;
-	PerspectiveSetup.far_plane = 2000.0f;
+	PerspectiveSetup.far_plane = 6000.0f;
 	PerspectiveSetup.near_plane = 0.1f;
 }
 
@@ -489,16 +494,10 @@ void drawScene(void)
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	timer = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
-	// set up camera following player
-	playerPos.z += 0.001;
-	// ViewSetup.target = playerPos;
 	View = lookAt(vec3(ViewSetup.position), vec3(ViewSetup.target), vec3(ViewSetup.upVector));
-	// View = translate(View, vec3(playerPos.x, playerPos.y, playerPos.z));
-	//  ViewSetup.direction = ViewSetup.target - ViewSetup.position;
-	//  ViewSetup.position += ViewSetup.direction * 0.001f;
-	// cout << ViewSetup.target.x << " " << ViewSetup.target.y << " " << ViewSetup.target.z << endl;
 
-	// Disegno Sky box
+	// cout << playerPos.x << " " << playerPos.y << " " << playerPos.z << " " << playerPos.w << endl;
+	//  Disegno Sky box
 	glDepthMask(GL_FALSE);
 	glUseProgram(programId1);
 	glUniform1f(loctime, timer);
@@ -607,12 +606,17 @@ void drawScene(void)
 
 			// Passo al Vertex Shader il puntatore alla matrice Model dell'oggetto k-esimo della Scena, che sar� associata alla variabile Uniform mat4 Projection
 			// all'interno del Vertex shader. Uso l'identificatio MatModel
-			ScenaObj[j][k].ancora_world = ScenaObj[j][k].ancora_obj;
-			ScenaObj[j][k].ancora_world = ScenaObj[j][k].ModelM * ScenaObj[j][k].ancora_world;
 			if (ScenaObj[j][k].nome == "Piper")
 			{
-				ScenaObj[j][k].ModelM = translate(ScenaObj[j][k].ModelM, vec3(playerPos.x, playerPos.y, playerPos.z));
+				ScenaObj[j][k].ModelM = translate(ScenaObj[j][k].ModelM, playerMov);
+				if (playerRotationQuat.w > 0)
+				{
+					ScenaObj[j][k].ModelM =  ScenaObj[j][k].ModelM *  toMat4(playerRotationQuat);					if(k == ScenaObj[j].size() - 1)
+					playerRotationQuat.w = -1;
+				}
 			}
+			ScenaObj[j][k].ancora_world = ScenaObj[j][k].ancora_obj;
+			ScenaObj[j][k].ancora_world = ScenaObj[j][k].ModelM * ScenaObj[j][k].ancora_world;
 
 			glUniformMatrix4fv(MatModel, 1, GL_FALSE, value_ptr(ScenaObj[j][k].ModelM));
 			glUniform1i(lsceltaVS, ScenaObj[j][k].sceltaVS);
@@ -632,11 +636,18 @@ void drawScene(void)
 		}
 	}
 
+	// ViewSetup.target = ScenaObj[0][0].ancora_world;
+	ViewSetup.target += vec4(playerMov, 0);
+	// ViewSetup.position = ScenaObj[0][0].ModelM * ViewSetup.position;
+	ViewSetup.direction = ViewSetup.target - ViewSetup.position;
+	ViewSetup.position = ViewSetup.target - normalize(ViewSetup.direction) * 40.0f;
+	//ViewSetup.position = vec4(playerMov, 0);
+
 	for (int i = 0; i < numTrees; i++)
 	{
 		float x = treePos[i].x * TREE_OFFSET;
 		float z = treePos[i].z * TREE_OFFSET;
-		tree.translateMainBody(x , treePos[i].y - TREE_OFFSET, z);
+		tree.translateMainBody(x, treePos[i].y - TREE_OFFSET, z);
 		tree.translateBodyPart();
 		// animation of eyes only for some timer
 		tree.scaleAll(2, 10, 2);
@@ -657,8 +668,8 @@ int main(int argc, char *argv[])
 {
 	glutInit(&argc, argv);
 
-	glutInitContextVersion(4, 0);
-	glutInitContextProfile(GLUT_CORE_PROFILE);
+	// glutInitContextVersion(4, 6);
+	// glutInitContextProfile(GLUT_CORE_PROFILE);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_RGBA);
 
 	// Inizializzo finestra per il rendering della scena 3d con tutti i suoi eventi le sue inizializzazioni e le sue impostazioni
@@ -672,7 +683,7 @@ int main(int argc, char *argv[])
 	glutMouseFunc(mouse);
 	glutKeyboardFunc(keyboardPressedEvent);
 	glutKeyboardUpFunc(keyboardReleasedEvent);
-	// glutPassiveMotionFunc(my_passive_mouse);
+	//  glutPassiveMotionFunc(my_passive_mouse);
 
 	glutMotionFunc(mouseActiveMotion); // Evento tasto premuto
 	glutTimerFunc(10, update, 0);

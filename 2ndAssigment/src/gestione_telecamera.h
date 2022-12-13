@@ -8,6 +8,15 @@ extern vec3 asse;
 extern string Operazione;
 extern string stringa_asse;
 extern vector<Mesh> Scena;
+extern vec3 playerMov;
+extern quat playerRotationQuat;
+
+
+/*player control to rotate the airplane*/
+float flyPitch = 0;
+float flyYaw = 0;
+float flyRoll = 0;
+
 
 void modifyModelMatrix(glm::vec3 translation_vector, glm::vec3 rotation_vector, GLfloat angle, GLfloat scale_factor)
 {
@@ -78,6 +87,20 @@ void moveCameraDown()
 	ViewSetup.target += vec4(upDirection, 0.0);
 }
 
+void turnLeftRight(float angle){
+	vec3 rollAxis = vec3(0, 0, 1);
+	quat rotation = angleAxis(radians(angle),rollAxis);
+	playerRotationQuat = rotation;
+}
+
+void turnUPDown(float angle){
+	vec3 pitchAxis = vec3(1, 0, 0);
+	quat rotation = angleAxis(radians(angle), pitchAxis);
+	playerRotationQuat = rotation;
+}
+
+
+
 //Gestione eventi tastiera per il movimento della telecamera
 void keyboardPressedEvent(unsigned char key, int x, int y)
 {
@@ -85,6 +108,23 @@ void keyboardPressedEvent(unsigned char key, int x, int y)
 	string str;
 	switch (key)
 	{
+
+	case 'j':
+		turnLeftRight(-2);
+		//playerMov.x -= -0.1;
+	break;
+	case 'k':
+		turnLeftRight(2);
+		//playerMov.x += 0.1;
+	break;
+	case 'u':
+		//turnUPDown(1);
+		playerMov.y += 0.2;
+	break;
+	case 'i':
+		//turnUPDown(-1);
+		playerMov.y -= 0.2;
+	break;
 
 	case 'a':
 		moveCameraLeft(); break;
@@ -142,6 +182,8 @@ void keyboardPressedEvent(unsigned char key, int x, int y)
 		WorkingAxis = Z;
 		stringa_asse = " Asse Z";  //Seleziona l'asse Z come asse lungo cui effettuare l'operazione selezionata (tra traslazione, rotazione, scalatura)
 		break;
+
+
 
 	default:
 		break;

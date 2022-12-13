@@ -227,11 +227,11 @@ void mouseActiveMotion(int x, int y)
 	mat4 rotation_matrix = toMat4(rotation);
 	// Aggiorniamo direzione e posizione della telecamera
 	ViewSetup.direction = rotation_matrix * ViewSetup.direction;
-	ViewSetup.target = playerPos;
-	// ViewSetup.upVector = rotation_matrix * ViewSetup.upVector;
-	ViewSetup.position = ViewSetup.target - normalize(ViewSetup.direction) * 70.0f;
+	//ViewSetup.target = playerPos;
+	//ViewSetup.upVector = rotation_matrix * ViewSetup.upVector;
+	ViewSetup.position = ViewSetup.target - normalize(ViewSetup.direction) * 40.0f;
 //	cout << ViewSetup.position.x << " " << ViewSetup.position.y << " " << ViewSetup.position.z << endl;
-	cout << ViewSetup.target.x << " " << ViewSetup.target.y << " " << ViewSetup.target.z << endl;
+	//cout << ViewSetup.target.x << " " << ViewSetup.target.y << " " << ViewSetup.target.z << endl;
 
 	// Memorizzo l' ultima posizione del mouse
 
