@@ -31,7 +31,7 @@
     <li>k to turn right</li>
     <li>u to fly high</li>
     <li>i to fly low</li>
-    <li>right lick to select objects, then with the middle mouse button you can change shader and material for the selected objects</li>
-    <li>left click to rotate arong the airplane</li>
+    <li>mouse right lick to select objects, then with the middle mouse button you can change shader and material for the selected objects</li>
+    <li>mouse left click to rotate arong the airplane</li>
     <li>W,S,A,D to move aroung the camera</li>
 </ul>
