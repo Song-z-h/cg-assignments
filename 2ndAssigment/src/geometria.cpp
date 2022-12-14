@@ -2,6 +2,8 @@
 #include "Lib.h"
 #include <iostream>
 extern vector<vec3> treePos;
+extern float mapGeneratorFrequency;
+
 void crea_cubo(Mesh *mesh)
 {
 
@@ -206,7 +208,7 @@ void crea_piano_suddiviso(Mesh *mesh, vec4 color, int height, int N = 100)
 		for (j = 0; j < N; j++)
 		{
 
-			float randHeight = getInterpolatedNoise(i / 2, j / 2) * height;
+			float randHeight = getInterpolatedNoise(i / mapGeneratorFrequency, j / mapGeneratorFrequency) * height;
 			float x = -0.5 + (float)i / N;
 			float z = -0.5 + (float)j / N;
 			mesh->vertici.push_back(vec3(x, randHeight, z));

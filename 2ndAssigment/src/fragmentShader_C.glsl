@@ -37,7 +37,7 @@ void main()
      FragColor=mix(ourColor,texture(id_tex,vec2(frag_coord_st.x,frag_coord_st.y)),1.0);
       //FragColor = ourColor;
     }else if(sceltaFS == 10){
-      FragColor=mix(ourColor,texture(id_tex,vec2(frag_coord_st.x,frag_coord_st.y) * 40),0.9);
+      FragColor=mix(ourColor,texture(id_tex,vec2(frag_coord_st.x,frag_coord_st.y) * 40),0.6);
 
     }         
        else if (sceltaFS==3)

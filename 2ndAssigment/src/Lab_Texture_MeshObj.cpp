@@ -43,6 +43,7 @@ string stringa_asse;
 float cameraSpeed = 0.1;
 bool moveCamera = false;
 
+float mapGeneratorFrequency = 2;
 Mesh3D tree(GL_TRIANGLES);
 vector<vec3> treePos;
 const int numTrees = 100;
@@ -62,7 +63,6 @@ float raggio_sfera = 2.5;
 
 string Operazione;
 vec3 asse = vec3(0.0, 1.0, 0.0);
-
 
 float Theta = -90.0f;
 float Phi = 0.0f;
@@ -543,8 +543,8 @@ void drawScene(void)
 
 	// Passo allo shader il puntatore a  colore luce, posizione ed intensit�
 
-	// glUniform3f(light_unif.light_position_pointer, light.position.x + 10 * cos(radians(angolo)), light.position.y, light.position.z + 10 * sin(radians(angolo)));
-	glUniform3f(light_unif.light_position_pointer, light.position.x, light.position.y, light.position.z);
+	glUniform3f(light_unif.light_position_pointer, light.position.x + 10 * cos(radians(angolo)), light.position.y, light.position.z + 10 * sin(radians(angolo)));
+	//glUniform3f(light_unif.light_position_pointer, light.position.x, light.position.y, light.position.z);
 
 	glUniform3f(light_unif.light_color_pointer, light.color.r, light.color.g, light.color.b);
 	glUniform1f(light_unif.light_power_pointer, light.power);

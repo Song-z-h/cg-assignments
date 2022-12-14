@@ -28,7 +28,6 @@ void material_menu_function(int option)
 	if (selected_obj > -1)
 		Scena[selected_obj].material = (MaterialType)option;
 	
-	cout << selected_obj << endl;
 }
 void shader_menu_function(int option)
 {
