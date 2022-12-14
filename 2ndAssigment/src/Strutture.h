@@ -1,10 +1,7 @@
 #pragma once
-#pragma once
 #include "Lib.h"
 
 #include <string>
-
-
 
 struct {
 	vec4 position;
@@ -129,3 +126,5 @@ typedef struct {
 
 static vector<Mesh> Scena;
 static vector<vector<MeshObj>> ScenaObj;
+static int selected_obj = 0;
+static int selected_meshobj = 0;

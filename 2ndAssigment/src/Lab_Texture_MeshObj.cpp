@@ -62,8 +62,7 @@ float raggio_sfera = 2.5;
 
 string Operazione;
 vec3 asse = vec3(0.0, 1.0, 0.0);
-int selected_obj = 0;
-int selected_meshobj = 0;
+
 
 float Theta = -90.0f;
 float Phi = 0.0f;
@@ -128,7 +127,7 @@ void INIT_SHADER(void)
 void INIT_Illuminazione()
 {
 	// Setup della luce
-	light.position = {-7.0, 17.0, 12.0};
+	light.position = {0.0, 15.0, -30.0};
 	light.color = {1.0, 1.0, 1.0};
 	light.power = 2.f;
 
@@ -397,7 +396,7 @@ void INIT_VAO(void)
 			// Model3D[i].ModelM = scale(Model3D[i].ModelM, vec3(2.5, 2.5, 2.5));
 			// Model3D[i].ModelM = rotate(Model3D[i].ModelM, radians(180.0f), vec3(0, 1, 0));
 			Model3D[i].nome = "Piper";
-            Model3D[i].ancora_obj = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+			Model3D[i].ancora_obj = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 			Model3D[i].sceltaVS = 1;
 			Model3D[i].sceltaFS = 5;
 		}
@@ -579,11 +578,11 @@ void drawScene(void)
 		{
 			// Visualizzo l'ancora dell'oggetto
 			int ind = Scena[k].indici.size() - 1;
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			glDrawElements(GL_POINTS, 1, GL_UNSIGNED_INT, BUFFER_OFFSET(ind * sizeof(GLuint)));
 		}
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		// glDrawElements(GL_TRIANGLES, (Scena[k].indici.size() - 1) * sizeof(GLuint), GL_UNSIGNED_INT, 0);
+		// glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		//  glDrawElements(GL_TRIANGLES, (Scena[k].indici.size() - 1) * sizeof(GLuint), GL_UNSIGNED_INT, 0);
 
 		if (k < Scena.size() - 1)
 		{
@@ -638,7 +637,7 @@ void drawScene(void)
 
 			glBindVertexArray(ScenaObj[j][k].VAO);
 
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			// glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			glDrawElements(GL_TRIANGLES, (ScenaObj[j][k].indici.size()) * sizeof(GLuint), GL_UNSIGNED_INT, 0);
 
 			glBindVertexArray(0);
@@ -647,16 +646,13 @@ void drawScene(void)
 
 	ViewSetup.target += vec4(playerMov, 0);
 	/**I need to define the airplane's motion with a direction, so i can apply the same rotation to the camera.*/
-	ViewSetup.direction = ViewSetup.target - ViewSetup.position;
-	vec3 tempPos = ViewSetup.target;
+	if (!moving_trackball)
+		ViewSetup.direction = ViewSetup.target - ViewSetup.position;
+	// vec3 tempPos = ViewSetup.target;
 	if (moveCamera)
-	{
 		ViewSetup.position = ViewSetup.target - normalize(ViewSetup.direction) * 40.0f;
-	}
 	else
-	{
 		ViewSetup.position = vec4(0, 0, -30, 0);
-	}
 
 	for (int i = 0; i < numTrees; i++)
 	{

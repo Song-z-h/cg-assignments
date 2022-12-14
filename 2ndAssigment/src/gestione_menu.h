@@ -2,20 +2,22 @@
 #include "materiali_base.h"
 #include "Strutture.h"
 #include "enum.h"
-extern int selected_obj;
-extern  vector<Mesh> Scena;
+extern vector<Mesh> Scena;
 extern vector<Material> materials;
-extern  vector<Shader> shaders;
+extern vector<Shader> shaders;
+extern int selected_obj;
+extern int selected_meshobj;
 
 void main_menu_func(int option)
 {
 	switch (option)
 	{
-	case MenuOption::WIRE_FRAME: glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	case MenuOption::WIRE_FRAME:
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		break;
-	case MenuOption::FACE_FILL: glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	case MenuOption::FACE_FILL:
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		break;
-
 
 	default:
 		break;
@@ -25,13 +27,19 @@ void material_menu_function(int option)
 {
 	if (selected_obj > -1)
 		Scena[selected_obj].material = (MaterialType)option;
+	
+	cout << selected_obj << endl;
 }
-
-void shader_menu_function(int option) {
+void shader_menu_function(int option)
+{
 	if (selected_obj > -1)
 		Scena[selected_obj].sceltaVS = shaders[option].value;
 
+	if (selected_meshobj > -1)
+		for (int i = 0; i < ScenaObj[selected_meshobj].size(); i++)
+			ScenaObj[selected_meshobj][i].sceltaVS = shaders[option].value;
 }
+
 void buildOpenGLMenu()
 {
 	int materialSubMenu = glutCreateMenu(material_menu_function);
@@ -50,8 +58,7 @@ void buildOpenGLMenu()
 	glutAddMenuEntry(shaders[ShaderOption::ONDE_SHADING].name.c_str(), ShaderOption::ONDE_SHADING);
 	glutAddMenuEntry(shaders[ShaderOption::BANDIERA_SHADING].name.c_str(), ShaderOption::BANDIERA_SHADING);
 
-
-	glutCreateMenu(main_menu_func); // richiama main_menu_func() alla selezione di una voce menu
+	glutCreateMenu(main_menu_func);	 // richiama main_menu_func() alla selezione di una voce menu
 	glutAddMenuEntry("Opzioni", -1); //-1 significa che non si vuole gestire questa riga
 	glutAddMenuEntry("", -1);
 	glutAddMenuEntry("Wireframe", MenuOption::WIRE_FRAME);
