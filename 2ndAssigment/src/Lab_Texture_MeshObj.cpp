@@ -43,11 +43,14 @@ string stringa_asse;
 float cameraSpeed = 0.1;
 bool moveCamera = false;
 
+/*map settings*/
 float mapGeneratorFrequency = 2;
+float octaves = 3;
 Mesh3D tree(GL_TRIANGLES);
 vector<vec3> treePos;
-const int numTrees = 100;
-const int TREE_OFFSET = 50;
+const int numTrees = 1000;
+int randValue[numTrees];
+const int MAP_SCALE = 10000;
 
 float skyRotationSpeed = 0.001f;
 float skyRotation = 0;
@@ -357,23 +360,25 @@ void INIT_VAO(void)
 		Scena.push_back(Sfera);
 	}
 
-	crea_Tree(&tree);
-	for (int i = 0; i < numTrees; i++)
-	{
-		treePos.push_back(vec3(rand() % 30 - 15, 0, rand() % 30 - 15));
-	}
-
 	crea_piano_suddiviso(&Pannello, vec4(0.0, 0.0, 0.0, 1.0), 220, 100);
 	crea_VAO_Vector(&Pannello);
 	Pannello.nome = "Pannello";
 	Pannello.ModelM = mat4(1.0);
 	// Pannello.ModelM = translate(Pannello.ModelM, vec3(-7.0, 0, -2.0));
-	Pannello.ModelM = scale(Pannello.ModelM, vec3(10000, 1, 10000));
+	Pannello.ModelM = scale(Pannello.ModelM, vec3(MAP_SCALE, 1, MAP_SCALE));
 	// Pannello.ModelM = rotate(Pannello.ModelM, radians(90.0f), vec3(1.0, 0.0, 0.0));
 	Pannello.sceltaVS = 1;
 	Pannello.sceltaFS = 10;
 	Pannello.material = MaterialType::EMERALD;
 	Scena.push_back(Pannello);
+
+	crea_Tree(&tree);
+	for (int i = 0; i < numTrees; i++)
+	{
+		//treePos.push_back(vec3(rand() % 30 - 15, 0, rand() % 30 - 15));
+		treePos[i] = Pannello.ModelM * vec4(treePos[i], 1.0);
+		randValue[i] = rand() % 100;
+	}
 
 	bool obj;
 	{
@@ -466,6 +471,12 @@ void INIT_CAMERA_PROJECTION(void)
 	PerspectiveSetup.fovY = 45.0f;
 	PerspectiveSetup.far_plane = 6000.0f;
 	PerspectiveSetup.near_plane = 0.1f;
+}
+
+bool isCloseTO(vec3 target, vec3 center, float meters){
+	return target.x > center.x - meters && target.x < center.x + meters &&
+	   target.z > center.z - meters && target.z < center.z + meters;
+	   
 }
 
 void resize(int w, int h)
@@ -649,23 +660,32 @@ void drawScene(void)
 	if (!moving_trackball)
 		ViewSetup.direction = ViewSetup.target - ViewSetup.position;
 	// vec3 tempPos = ViewSetup.target;
+	
 	if (moveCamera)
 		ViewSetup.position = ViewSetup.target - normalize(ViewSetup.direction) * 40.0f;
 	else
 		ViewSetup.position = vec4(0, 0, -30, 0);
-
-	for (int i = 0; i < numTrees; i++)
+  
+	
+	int randIndex = 0;
+	for (int i = 0; i < 10000; i += randValue[randIndex])
 	{
-		float x = treePos[i].x * TREE_OFFSET;
-		float z = treePos[i].z * TREE_OFFSET;
-		tree.translateMainBody(x, treePos[i].y - TREE_OFFSET, z);
+		randIndex = i % 1000;
+		float x = treePos[i].x * MAP_SCALE;
+		float z = treePos[i].z * MAP_SCALE;
+		float y = treePos[i].y;
+		tree.resetModelMat();
+		tree.translateMainBody(x, y + 30, z);
 		tree.translateBodyPart();
+		tree.scaleAll(20, 60, 20);
 		// animation of eyes only for some timer
-		tree.scaleAll(2, 10, 2);
 		tree.rotateAll(180, 1, 0, 0);
-		tree.draw(MatModel, lsceltaVS, lsceltaFS, light_unif, loc_texture, texture, texture2);
+		//cout << x << " " << z << endl;
+		//if(isCloseTO(treePos[i], vec3(0, 0, 0), 10))
+		if(randValue[randIndex] < 10 ||randValue[randIndex] > 90)
+			tree.draw(MatModel, lsceltaVS, lsceltaFS, light_unif, loc_texture, texture, texture2);
 	}
-
+	//cout << playerMov.x << " " << playerMov.z << endl;
 	glutSwapBuffers();
 }
 void update(int a)

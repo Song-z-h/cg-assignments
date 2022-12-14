@@ -85,7 +85,7 @@ public:
 
     void translateMainBody(float x = 0, float y = 0, float z = 0)
     {
-        resetModelMat();
+        //resetModelMat();
         for (int i = 0; i < bodyParts.size(); i++)
         {
             bodyParts[i].ModelM = translate(bodyParts[i].ModelM, vec3(x, y, z));

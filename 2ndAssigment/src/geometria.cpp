@@ -3,6 +3,7 @@
 #include <iostream>
 extern vector<vec3> treePos;
 extern float mapGeneratorFrequency;
+extern float octaves;
 
 void crea_cubo(Mesh *mesh)
 {
@@ -199,6 +200,15 @@ float getInterpolatedNoise(float x, float z)
 	return interpolate(i1, i2, fracZ);
 }
 
+float generateHeight(int x, int z, float height)
+{
+	float fq = mapGeneratorFrequency;
+	float total = getInterpolatedNoise(x / fq, z / fq) * height;
+	total += getInterpolatedNoise(x / (fq / 2), z / (fq / 2)) * height / octaves;
+	total += getInterpolatedNoise(x / (fq / 4), z / (fq / 4)) * height / (octaves * octaves);
+	return total;
+}
+
 void crea_piano_suddiviso(Mesh *mesh, vec4 color, int height, int N = 100)
 {
 	int i, j;
@@ -208,17 +218,17 @@ void crea_piano_suddiviso(Mesh *mesh, vec4 color, int height, int N = 100)
 		for (j = 0; j < N; j++)
 		{
 
-			float randHeight = getInterpolatedNoise(i / mapGeneratorFrequency, j / mapGeneratorFrequency) * height;
+			//float randHeight = getInterpolatedNoise(i / mapGeneratorFrequency, j / mapGeneratorFrequency) * height;
+			float randHeight = generateHeight(i, j, height);
 			float x = -0.5 + (float)i / N;
 			float z = -0.5 + (float)j / N;
 			mesh->vertici.push_back(vec3(x, randHeight, z));
 			mesh->colori.push_back(color);
 			mesh->normali.push_back(vec3(0.0, 1.0, 0.0));
 			mesh->texCoords.push_back(vec2((float)i / N, (float)j / N));
-			
+
 			/**trees on this land*/
 			treePos.push_back(vec3(x, randHeight, z));
-
 		}
 	}
 
