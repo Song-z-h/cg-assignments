@@ -35,3 +35,5 @@
     <li>mouse left click to rotate arong the airplane</li>
     <li>W,S,A,D to move aroung the camera</li>
 </ul>
+
+The objective of this game is to fly forever, you are free to control the airplane to move forward.
